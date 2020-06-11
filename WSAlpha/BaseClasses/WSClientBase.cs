@@ -59,15 +59,14 @@ using WebSocketSharp;
 
 public abstract class WSClientBase : MonoBehaviour
 {
-	public CommStats statsSumary = new CommStats(); //temporary
-	protected Queue<MessageEventArgs> messageQueue = new Queue<MessageEventArgs>();
+	[Space(10)]
 	[ReadOnly]
 	public bool isConnected = false;
+	public CommStats statsSumary = new CommStats(); //temporary
+	protected Queue<MessageEventArgs> messageQueue = new Queue<MessageEventArgs>();
 	public string serviceName = "/test";
 	protected abstract void OnMessageDequeue(MessageEventArgs message);
-
 	protected Queue<bool> conntectionEvents = new Queue<bool>();
-
 	protected WebSocketSharp.WebSocket ws;
 	public bool autoConnect = true;
 
@@ -89,12 +88,22 @@ public abstract class WSClientBase : MonoBehaviour
 	Coroutine measure;
 	GameObject myGameObject;
 	protected bool IsConnected { get { return ws != null && ws.IsConnected; } }
+	protected string GetServiceName()
+	{
+		string possiblename = this.GetType().ToString();
+		if (possiblename.StartsWith("WS"))
+			possiblename = possiblename.Substring(2);
+		if (possiblename.EndsWith("Service"))
+			possiblename = possiblename.Substring(0, possiblename.Length - "Service".Length);
+		possiblename = possiblename.ToLower();
+		return "/" + possiblename;;
+	}
 	protected virtual void Reset()
 	{
 		string possiblename = this.GetType().ToString();
 		if (possiblename.StartsWith("WS"))
 			possiblename = possiblename.Substring(2);
-	//	if (possiblename.EndsWith("Client"))
+		//	if (possiblename.EndsWith("Client"))
 		//	possiblename = possiblename.Substring(0, possiblename.Length - "Client".Length);
 
 		serviceName = "/" + possiblename;
@@ -124,7 +133,7 @@ public abstract class WSClientBase : MonoBehaviour
 		Debug.Log((WSServer.frameCount + (this.GetType().ToString() + " " + s).MakeColor(0, .6f, .9f)).Small(), myGameObject);
 	}
 
-	public void Send(string s)
+	public void SendString(string s)
 	{
 		statsSumary.AddBytesSent(s.Length);
 		if (ws != null && ws.IsConnected)
@@ -134,7 +143,7 @@ public abstract class WSClientBase : MonoBehaviour
 			DebugClient("not connected");
 		}
 	}
-	public void Send(byte[] bytes)
+	public void SendBytes(byte[] bytes)
 	{
 		if (ws != null && ws.IsConnected)
 		{
@@ -248,8 +257,7 @@ public abstract class WSClientBase : MonoBehaviour
 	private void OnOpenHandlerNonSynced(object sender, System.EventArgs e)
 	{
 		conntectionEvents.Enqueue(true);
-
-		DebugClient("client connected");
+		// DebugClient("client connected");
 	}
 
 	private void OnCloseHandlerNonSynced(object sender, CloseEventArgs e)

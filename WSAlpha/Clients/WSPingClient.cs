@@ -17,7 +17,7 @@ public class WSPingClient : WSClientBase
 	{
 		if (ws.IsConnected)
 		{
-			Send(" ping ");
+			SendString(" ping ");
 			DebugClient("sent");
 		}
 		else
@@ -31,7 +31,7 @@ public class WSPingClient : WSClientBase
 	{
 		if (ws.IsConnected)
 		{
-			Send(" ping ".ToByteArray());
+			SendBytes(" ping ".ToByteArray());
 			DebugClient("sent");
 		}
 		else

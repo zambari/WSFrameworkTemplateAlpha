@@ -35,7 +35,7 @@ namespace UnityOSC
 {
     public sealed class OSCMessage : OSCPacket
     {
-      // warning, subsequent reads might give you array out of bounds error
+        // warning, subsequent reads might give you array out of bounds error
 
         #region Constructors
 
@@ -54,13 +54,14 @@ namespace UnityOSC
             Append(msgvalue);
 
         }
-        
+
         #endregion
 
         #region Member Variables
         private const char INTEGER = 'i';
         private const char FLOAT = 'f';
         private const char LONG = 'h';
+        private const char ULONG = 'u';
         private const char DOUBLE = 'd';
         private const char STRING = 's';
         private const char BYTE = 'b';
@@ -121,7 +122,7 @@ namespace UnityOSC
         /// A <see cref="OSCMessage"/>
         /// </returns>
         /// 
-     public static OSCMessage Unpack(byte[] data, ref int start)
+        public static OSCMessage Unpack(byte[] data, ref int start)
         {
             string address = OSCPacket.UnpackString(data, ref start);
             OSCMessage message = new OSCMessage(address);
@@ -145,6 +146,9 @@ namespace UnityOSC
 
                     case LONG:
                         value = OSCPacket.UnpackLong(data, ref start);
+                        break;
+                    case ULONG:
+                        value = OSCPacket.UnpackULong(data, ref start);
                         break;
                     case DOUBLE:
                         value = OSCPacket.UnpackDouble(data, ref start);
@@ -240,6 +244,7 @@ namespace UnityOSC
             if (val is byte[]) return BYTE;
             if (val is System.Int32) return INTEGER;
             if (val is System.Int64) return LONG;
+            if (val is System.UInt64) return ULONG;
             if (val is System.Double) return DOUBLE;
             return DEFAULT;
         }

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityOSC;
 
-public abstract class WSOSCServer : WSServiceBase
+public abstract class WSOSCService : WSServiceBase
 {
 	protected abstract void OnOSCMessage(OSCMessage message, WSServiceBehaviour beh);
 

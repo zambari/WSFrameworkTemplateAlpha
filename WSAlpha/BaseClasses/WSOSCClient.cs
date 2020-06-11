@@ -26,5 +26,18 @@ public abstract class WSOSCClient : WSClientBase
 		else
 			DebugClient("unpacking osc messge failed " + message.Data);
 	}
+	public void SendAsync(OSCMessage msg)
+	{
+		Send(msg);
+	}
+	public void Send(OSCMessage msg)
+	{
+		if (ws == null)
+		{
+			DebugClient("socket not connected");
+			return;
+		}
+		ws.SendAsync(msg.BinaryData, null);
+	}
 
 }

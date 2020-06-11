@@ -48,14 +48,18 @@ public class WSCameraClient : WSOSCClient
     [ExposeMethodInEditor]
     void SendConfig()
     {
-        Send(WSCameraService.oscSetResolution.WrapAsOscPayload(resolution.x, resolution.y, jpgQuality));
+        var msg = new OSCMessage(WSCameraService.oscSetResolution);
+        msg.Append(resolution.x);
+        msg.Append(resolution.y);
+        msg.Append(jpgQuality);
+        Send(msg);
         // DebugClient("Sent setres /setResolution " + WSCameraService.oscSetResolution);
     }
 
     [ExposeMethodInEditor]
     void SendRequest()
     {
-        Send(WSCameraService.oscRequestFrame.WrapAsOscPayload());
+        SendBytes(WSCameraService.oscRequestFrame.WrapAsOscPayload());
         // DebugClient("Seent requeqst " + WSCameraService.oscRequestFrame);
     }
 
@@ -76,7 +80,7 @@ public class WSCameraClient : WSOSCClient
         if (message.Address == WSCameraService.oscFrameAddress)
         {
             byte[] data = message.GetBytes();
-        
+
             if (texture == null)
                 texture = new Texture2D(1, 1);
             if (texture.LoadImage(data))

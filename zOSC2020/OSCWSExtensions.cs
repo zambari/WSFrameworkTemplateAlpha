@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityOSC;
+using WebSocketSharp.Server;
 
 public static class OSCWSExtensions
 {
@@ -12,6 +13,10 @@ public static class OSCWSExtensions
 	{
 		OSCMessage message = new OSCMessage(address);
 		return message.BinaryData;
+	}
+	public static void Send(this WebSocketBehavior beh, OSCMessage message)
+	{
+		beh.SendAsync(message.BinaryData, null);
 	}
 	public static byte[] WrapAsOscPayload(this string payload, string address)
 	{
@@ -26,7 +31,7 @@ public static class OSCWSExtensions
 		message.Append(y);
 		return message.BinaryData;
 	}
-	public static byte[] WrapAsOscPayload(this byte[] bytes, string address )
+	public static byte[] WrapAsOscPayload(this byte[] bytes, string address)
 	{
 		OSCMessage message = new OSCMessage(address);
 		message.Append(bytes);
@@ -40,7 +45,7 @@ public static class OSCWSExtensions
 		message.Append(q);
 		return message.BinaryData;
 	}
-	public static byte[] WrapAsOscPayload(this float payload ,string address)
+	public static byte[] WrapAsOscPayload(this float payload, string address)
 	{
 		OSCMessage message = new OSCMessage(address);
 		message.Append(payload);

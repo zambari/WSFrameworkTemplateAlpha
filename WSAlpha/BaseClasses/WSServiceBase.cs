@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using WebSocketSharp;
 using WebSocketSharp.Server;
+// v.01. twaks
 
 public abstract class WSServiceBase : MonoBehaviour
 {
@@ -56,8 +57,8 @@ public abstract class WSServiceBase : MonoBehaviour
 		}
 		if (clientHanlders.Count == 0)
 			DebugService("no clients connected");
-	//	else
-	//		DebugService("Broadcast " + s.Length + "bytes to " + clientHanlders.Count + " clients");
+		//	else
+		//		DebugService("Broadcast " + s.Length + "bytes to " + clientHanlders.Count + " clients");
 	}
 
 	protected virtual void OnOpen(WSServiceBehaviour serviceBehaviour)
@@ -65,16 +66,21 @@ public abstract class WSServiceBase : MonoBehaviour
 		//	clientHanlders.Add(serviceBehaviour);
 		// DebugService("WSServiceBehaviour Open ");
 	}
-	protected virtual void Reset()
+	protected string GetServiceName()
 	{
 		string possiblename = this.GetType().ToString();
 		if (possiblename.StartsWith("WS"))
 			possiblename = possiblename.Substring(2);
 		if (possiblename.EndsWith("Service"))
-			possiblename = possiblename.Substring(-7);
-
-		serviceName = "/" + possiblename;
+			possiblename = possiblename.Substring(0, possiblename.Length - "Service".Length);
+		possiblename = possiblename.ToLower();
+		return "/" + possiblename;;
+	}
+	protected virtual void Reset()
+	{
 		GetServer();
+
+		serviceName = GetServiceName();
 	}
 	void GetServer()
 	{

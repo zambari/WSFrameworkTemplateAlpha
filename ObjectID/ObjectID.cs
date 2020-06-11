@@ -9,7 +9,7 @@ using UnityEngine.UI;
 using Z;
 [ExecuteInEditMode]
 [DisallowMultipleComponent]
-public class ObjectID : MonoBehaviour, IRequestInitEarly//, IContextMenuBuilder
+public class ObjectID : MonoBehaviour, IRequestInitEarly //, IContextMenuBuilder
 {
     //  public UniqueIDBadge badge;
     // public static System.Random rnd;// = new System.Random();
@@ -69,7 +69,7 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly//, IContextMenuBuilder
 
             if (RegisterID(ObtainIdentifierFromTime(), this)) return;
         }
-        Debug.Log("Failed getting unieqe iod "+name, gameObject);
+        Debug.Log("Failed getting unieqe iod " + name, gameObject);
         //  string nameoption= name;
 
         // proposal=ObtainFromName(name+(transform.parent==null?"root":transform.parent.name));
@@ -92,6 +92,7 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly//, IContextMenuBuilder
 
     }
     System.Random random;
+
     public ulong ObtainRandomme()
     {
         if (random == null)
@@ -159,6 +160,10 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly//, IContextMenuBuilder
         //  ValidateId(rnd);
         Init(this);
 
+    }
+    public static Transform FindTransform(ulong val)
+    {
+        return val.FindTransform();
     }
     // string GetAsString(ulong id)
     // {
@@ -302,19 +307,18 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly//, IContextMenuBuilder
     static List<Material> _copiedMaterials;
     // public void BuildContextMenu(PrefabProvider prefabs, Transform target)
     // {
-     
+
     //     prefabs.GetLabel(target, idStringPartA);
     //     prefabs.GetLabel(target, idStringPartB);
 
-		
-	// 	var toggle = prefabs.GetToggle(target, "activeSelf");
-	// 	toggle.isOn = gameObject.activeSelf;
-	// 	var toggle2 = prefabs.GetToggle(target, "ActiveInh");
-	// 	toggle2.isOn = gameObject.activeInHierarchy;
-	// 	toggle.AddCallback((x) => gameObject.SetActive(x));
-	// 	toggle2.AddCallback((x) => gameObject.SetActive(x));
-	// if (!enabled) return;
- 
+    // 	var toggle = prefabs.GetToggle(target, "activeSelf");
+    // 	toggle.isOn = gameObject.activeSelf;
+    // 	var toggle2 = prefabs.GetToggle(target, "ActiveInh");
+    // 	toggle2.isOn = gameObject.activeInHierarchy;
+    // 	toggle.AddCallback((x) => gameObject.SetActive(x));
+    // 	toggle2.AddCallback((x) => gameObject.SetActive(x));
+    // if (!enabled) return;
+
     //     var meshRenderers = GetComponentsInChildren<MeshRenderer>();
     //     if (meshRenderers.Length > 0)
     //     {

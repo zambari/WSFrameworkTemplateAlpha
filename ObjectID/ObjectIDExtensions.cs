@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+// v.02 more finds
+
 public interface IProvideLabel
 {
 
@@ -22,6 +25,12 @@ public static class ObjectIDExtensions
         else return 0;
     }
 
+    public static ulong GetID(this Transform g)
+    {
+        var id = g.GetComponent<ObjectID>();
+        if (id != null) return id.identifier;
+        else return 0;
+    }
     public static GameObject FindObject(this ulong val)
     {
         if (ObjectID.objectDict == null) return null;
@@ -29,10 +38,17 @@ public static class ObjectIDExtensions
         ObjectID.objectDict.TryGetValue(val, out obj);
         return obj;
     }
-
+    public static Transform FindTransform(this ulong val)
+    {
+        if (ObjectID.objectDict == null) return null;
+        GameObject obj;
+        ObjectID.objectDict.TryGetValue(val, out obj);
+        if (obj == null) return null;
+        return obj.transform;
+    }
     public static ulong GetObjectID(this Component source, bool createIfNotFound = false)
     {
-        if (source==null) return 0;
+        if (source == null) return 0;
         return GetObjectID(source.transform);
     }
     // public static ulong GetObjectID(this GameObject source)

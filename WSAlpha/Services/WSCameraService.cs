@@ -7,7 +7,7 @@ using WebSocketSharp;
 using Z;
 //zbr 2020
 
-public class WSCameraService : WSOSCServer
+public class WSCameraService : WSOSCService
 {
 	new Camera camera { get { if (_camera == null) _camera = GetComponent<Camera>(); return _camera; } }
 	Camera _camera;

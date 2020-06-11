@@ -270,7 +270,42 @@ namespace Z
             }
             return children;
         }
+        public static T[] GetComponentsInChildrenIncludingInactive<T>(this Component k, List<Transform> childrenList)
+        {
 
+            List<T> list = new List<T>();
+            foreach (var c in childrenList)
+            {
+                var thisComponent = c.GetComponent<T>();
+                if (thisComponent != null) list.Add(thisComponent);
+            }
+            return list.ToArray();
+        }
+
+        public static List<T> GetComponentsInChildrenIncludingInactive<T>(this Component k)
+        {
+            List<T> list = new List<T>();
+            var allchildren = k.transform.GetAllChildren();
+            foreach (var c in allchildren)
+            {
+                var thisComponent = c.GetComponent<T>();
+                if (thisComponent != null) list.Add(thisComponent);
+            }
+            return list; //.ToArray();
+        }
+        public static List<Transform> GetAllChildren(this Transform transform, List<Transform> list = null)
+        {
+            if (list == null) list = new List<Transform>();
+            list.Add(transform);
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                var thisTransform = transform.GetChild(i);
+                thisTransform.GetAllChildren(list);
+            }
+
+            return list;
+
+        }
         public static GameObject[] GetChildren(this GameObject thisGo, bool deep = false)
         {
             if (!deep)
