@@ -15,6 +15,7 @@ namespace Z.Reflection
 		public string getName;
 		public FieldType fieldType;
 		public float lastValue;
+		public bool lastBoolValue { get { return lastValue > 0; } set { lastValue = value?1 : 0; } }
 		public string lastStringValue;
 		public bool show = true;
 		//	public string backingFieldName;
@@ -23,23 +24,40 @@ namespace Z.Reflection
 		[SerializeField] bool _hasGet;
 		[SerializeField] bool _hasSet;
 		public bool hasField;
-	public bool hasOnValidateNew;
+		public bool hasOnValidateNew;
 		public bool hasGet { get { return _hasGet; } set { _hasGet = value; } }
 		public bool hasSet { get { return _hasSet; } set { _hasSet = value; } }
 		public Vector2 valueRange;
 
 		public enum FieldType { Unknown, FloatField, IntField, BoolField, StringField, ClassField, TransformField, GameObjectField }
 		public AccessType accessType;
-		public void ReadValue(object o)
+		public bool ReadValue(object o)
 		{
 			if (fieldType == FieldType.FloatField)
+			{
+				var previousVal = lastValue;
 				lastValue = GetFloatValue(o);
+				return (lastValue != previousVal);
+			}
 			if (fieldType == FieldType.IntField)
+			{
+				var previousVal = lastValue;
 				lastValue = GetIntValue(o);
+				return (lastValue != previousVal);
+			}
 			if (fieldType == FieldType.StringField)
+			{
+				var previousVal = lastStringValue;
 				lastStringValue = GetStringValue(o);
+				return (lastStringValue != previousVal);
+			}
 			if (fieldType == FieldType.BoolField)
-				lastValue = GetBoolValue(o) ? 1 : 0;
+			{
+				var previousVal = lastBoolValue;
+				lastBoolValue = GetBoolValue(o);
+				return (lastBoolValue != previousVal);
+			}
+			return false;
 			// Debug.Log(" last val " + baseName + " " + lastValue);
 		}
 

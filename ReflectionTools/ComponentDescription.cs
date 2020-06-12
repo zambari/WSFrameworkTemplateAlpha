@@ -12,11 +12,11 @@ namespace Z.Reflection
 	{
 		public ulong objectID;
 
-public ComponentDescriptorWithHandles(ulong id)
-{
-	objectID=id;
-}
-		public List<MemberInstanceLink> memberInstances;
+		public ComponentDescriptorWithHandles(ulong id)
+		{
+			objectID = id;
+		}
+		public List<ValueProxy> memberInstances;
 	}
 
 	[System.Serializable]
@@ -31,34 +31,43 @@ public ComponentDescriptorWithHandles(ulong id)
 		// {
 		// 	return GetVisibleAsJson(referenceObject.GetID());
 		// }
-		public string GetVisibleAsJson(ulong id,Component c)
+
+		/// <summary>
+		/// This method builds a reduced, serialized 
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="c"></param>
+		/// <returns></returns>
+		public ComponentDescriptorWithHandles GetTransferableDescription(ulong id, Component c)
 		{
 			var newDescriptor = new ComponentDescriptorWithHandles(id);
-			ulong baseId = id.Compact();
+			//	ulong baseId = id.Compact();
 			newDescriptor.typeName = typeName;
-			newDescriptor.memberInstances = new List<MemberInstanceLink>();
+			newDescriptor.memberInstances = new List<ValueProxy>();
 
-			for (int i=0;i<members.Count;i++)
+			for (int i = 0; i < members.Count; i++)
 			{
-				if (members[i].show)	
+				if (members[i].show)
 				{
-					ulong thisid= baseId.MergeWithInt(ObjectID.incremental);// ValueProxy.MakeValueUnique(baseId);
-					
-					var thisInstanceMember= new MemberInstanceLink(members[i],thisid);
-					var thisProxy=new ValueProxy(thisInstanceMember,c);
+					var thisProxy = new ValueProxy(members[i], c);
 					thisProxy.name = members[i].baseName; // gameobject names
-					ValueProxy.RegisterProxy(thisid,thisProxy);
-					thisInstanceMember.hasOnValidateNew=hasOnValidate;
-					newDescriptor.memberInstances.Add(thisInstanceMember);
+					thisProxy.memberId=ValueProxy.incremental;
+					Debug.Log("created id = " + thisProxy.memberId);
+					ValueProxy.RegisterProxy(thisProxy);
+					newDescriptor.memberInstances.Add(thisProxy);
 				}
 			}
 			newDescriptor.hasOnValidate = hasOnValidate;
-			
-			return JsonUtility.ToJson(newDescriptor   //line breaks #iffed
+			return newDescriptor;
+		}
+		public string GetVisibleAsJson(ulong id, Component c) //used by service
+		{
+			var descriptor = GetTransferableDescription(id, c);
 #if UNITY_EDITOR
-				, true //faster in builds
+			return JsonUtility.ToJson(descriptor, true); //faster in builds
+#else
+			return JsonUtility.ToJson(descriptor, false);
 #endif
-			);
 		}
 		private ComponentDescriptor() {}
 		public static ComponentDescriptor GetDescriptor(string t)
@@ -73,12 +82,12 @@ public ComponentDescriptorWithHandles(ulong id)
 			ComponentDescriptor descriptor = null;
 			if (descriptionDict.TryGetValue(t, out descriptor))
 			{
-				Debug.Log("found component desciptor for typ "+t.ToString()+" in dictionary");
+				Debug.Log("found component desciptor for typ " + t.ToString() + " in dictionary");
 				return descriptor;
 			}
 			else
 			{
-				Debug.Log("not found in dict "+t);
+				Debug.Log("not found in dict " + t);
 			}
 			var loadpath = GetSaveLoadPath(t.ToString());
 			if (System.IO.File.Exists(loadpath))
@@ -95,12 +104,12 @@ public ComponentDescriptorWithHandles(ulong id)
 			}
 			else
 			{
-				Debug.Log("does not exis creating desc for "+t);
+				Debug.Log("does not exis creating desc for " + t);
 			}
 			descriptor = new ComponentDescriptor();
 			descriptor.Scan(t);
 			descriptionDict.Add(t, descriptor);
-			Debug.Log("scan for "+t+"shows " + descriptor.members.Count + " members");
+			Debug.Log("scan for " + t + "shows " + descriptor.members.Count + " members");
 			return descriptor;
 		}
 		public void ReadValues(Component src)

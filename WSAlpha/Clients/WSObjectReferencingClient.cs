@@ -8,7 +8,6 @@ using Z.Reflection;
 
 public class WSObjectReferencingClient : WSOSCClient
 {
-	public ulong targetID = 7327144221104664690;
 	public TRSReportLevel tRSReportLevel;
 	public WSComponentPopulator componentHandler;
 	protected override void OnOSCMessage(OSCMessage message)
@@ -40,7 +39,8 @@ public class WSObjectReferencingClient : WSOSCClient
 
 		if (address.StartsWith(Const.objectIDKeywordAddress + Const.objectComponentsDetailsAddress))
 		{
-			DebugClient("got message detaols " + message.GetString(0));
+			DebugClient("got message detaols ===============");
+			Debug.Log("in objectComponentsDetailsAddress :"+ message.GetString(0));
 			var descriptor = JsonUtility.FromJson<ComponentDescriptorWithHandles>(message.GetString(0));
 			if (descriptor != null)
 				componentHandler.OnComponentDetails(descriptor);
@@ -62,45 +62,16 @@ public class WSObjectReferencingClient : WSOSCClient
 
 	public void OnNodeClicked(TransformNodeInfo node)
 	{
-		RequestByObjectID(node.objectId);
+		RequestComponentsFromObjectID(node.objectId);
 	}
 
-	[ExposeMethodInEditor]
-	void Request()
-	{
-		RequestByObjectID(targetID);
-
-	}
-	void RequestByObjectID(ulong id)
+	
+	void RequestComponentsFromObjectID(ulong id)
 	{
 		OSCMessage message = new OSCMessage(Const.objectIDKeywordAddress + Const.objectComponentsAddress);
 		message.Append(id);
 		SendAsync(message);
 	}
 
-	[ExposeMethodInEditor]
-	void RequestComponents()
-	{
-		OSCMessage message = new OSCMessage(Const.objectIDKeywordAddress + Const.objectComponentsAddress);
-		message.Append(targetID);
-		//	message.Append(targetID5);
-		SendAsync(message);
-	}
-
-	[ExposeMethodInEditor]
-	void RequestTransform()
-	{
-		OSCMessage message = new OSCMessage(Const.objectIDKeywordAddress + Const.GetAddressFor(tRSReportLevel));
-		message.Append(targetID);
-		//	message.Append(targetID5);
-		SendAsync(message);
-	}
-
-	[ExposeMethodInEditor]
-	void AddressTarget()
-	{
-		var o = ObjectID.FindTransform(targetID);
-		Debug.Log("o ==null " + o == null);
-	}
-
+	
 }

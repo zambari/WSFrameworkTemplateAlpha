@@ -3,13 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+// public class WSHierarchyRequest : WSFrameworkMessage
+// {
+// 	public string _type = "hierarchyRequest";
+// 	public override string type { get { return _type; } }
+// 	public LayerMask layerMask = System.Int32.MaxValue;
+// 	public long root = 0;
+// }
 [System.Serializable]
 public class WSHierarchyResponse : WSFrameworkMessage
 {
 	public string _type = "hierarchyResponse";
-	public override string type { get { return _type; } }
 	public ulong root = 0;
-	public long root2 = 0;
+	public override string type { get { return _type; } }
+	// public long root2 = 0;
 	public List<TransformNodeInfo> nodes = new List<TransformNodeInfo>();
 }
 
@@ -18,6 +25,8 @@ public class GameObjectInfo // : WSFrameworkMessage
 {
 	public string name;
 	public ulong id;
+
+	public string idFingerPrint;
 	public bool isActive;
 	public string[] componentNames;
 	public GameObjectInfo(GameObject g)
@@ -28,6 +37,7 @@ public class GameObjectInfo // : WSFrameworkMessage
 	{
 		name = g.name;
 		id = g.GetID();
+		idFingerPrint=id.ToFingerprintString(false);
 		isActive = g.activeSelf;
 		var comps = g.GetComponents<Component>();
 		componentNames = new string[comps.Length];
@@ -45,7 +55,7 @@ public class TransformNodeInfo
 {
 	public string name;
 	public ulong objectId;
-	public System.Int32 flags;
+	// public System.Int32 flags;
 	public int layer;
 	public int hideFlags;
 	public TransformNodeInfo(Transform src)
@@ -63,11 +73,4 @@ public abstract class WSFrameworkMessage
 {
 	public abstract string type { get; }
 
-}
-public class WSHierarchyRequest : WSFrameworkMessage
-{
-	public string _type = "hierarchyRequest";
-	public override string type { get { return _type; } }
-	public LayerMask layerMask = System.Int32.MaxValue;
-	public long root = 0;
 }

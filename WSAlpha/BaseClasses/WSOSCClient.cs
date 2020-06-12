@@ -21,13 +21,20 @@ public abstract class WSOSCClient : WSClientBase
 			if (oscpacket.typeTag[0] == 's')
 				DebugClient(oscpacket.Address + " MESSAGE recieved  " + oscpacket.GetString(0));
 		}
-		if (oscpacket != null)
+		
+		if (oscpacket.typeTag != null && oscpacket.typeTag.Length > 1 && oscpacket.typeTag[1] == 's')
 		{
-			OnOSCMessage(oscpacket as OSCMessage);
-			//	DebugClient("recieved " + oscpacket.Address);
+			DebugClient("String payload ==========:");
+			Debug.Log(oscpacket.GetString(0));
 		}
-		else
-			DebugClient("unpacking osc messge failed " + message.Data);
+		OnOSCMessage(oscpacket as OSCMessage);
+		// if (oscpacket != null)
+		// {
+		// 
+		// 	//	DebugClient("recieved " + oscpacket.Address);
+		// }
+		// else
+		// 	DebugClient("unpacking osc messge failed " + message.Data);
 	}
 	public void SendAsync(OSCMessage msg)
 	{

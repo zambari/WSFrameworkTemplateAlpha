@@ -99,7 +99,7 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly //, IContextMenuBuilder
     /// always returns value +1 from the previous requested (globally)
     /// </summary>
     /// <value></value>
-    public static System.Int32 incremental { get { return _incremental++; } }
+    public static System.Int32 incremental { get { return _incremental++; } set { _incremental=value; } }
 
     /// <summary>
     /// debug 
@@ -130,6 +130,7 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly //, IContextMenuBuilder
             {
                 return true;
             }
+             ObjectID.incremental++; //skipping one
             // Debug.Log($" key {id} was present was pointintg at a diffent obejct '{ objectID.name}' other was '{ objectDict[id].NameOrNull()}'", objectID);
             return false;
         }

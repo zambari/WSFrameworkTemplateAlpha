@@ -7,8 +7,8 @@ using Z.Reflection;
 public class ValueRemote
 {
 	Slider slider;
-		MemberInstanceLink link;
-	public ulong valueId;
+	ValueProxy link;
+	public int memberId { get { return link.memberId;}}
 	public void UpdateValue(float f)
 	{
 		if (slider==null)
@@ -34,14 +34,13 @@ public class ValueRemote
 	}
 	void OnSliderMove(float f)
 	{
-
-		WSValueClient.RequestValueChange(valueId, f);
+		WSValueClient.RequestValueChange(memberId, f);
 	}
 
-	public ValueRemote(MemberInstanceLink link)
+	public ValueRemote(ValueProxy link)
 	{
 		this.link = link;
-		this.valueId = link.instanceReference;
+	//	this.valueId = link.objectIdTarget;
 
 	}
 	public static void RegisterRemote(ulong v, ValueRemote remote)

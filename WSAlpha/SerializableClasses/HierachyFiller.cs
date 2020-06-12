@@ -32,7 +32,7 @@ public class HierachyFiller : ScrolPooledControllerBase
 				itemSelectionReciever.OnNodeClicked(node);
 			});
 		//	DestroyImmediate(b);
-		item.label = node.name + " / " + (node.objectId == 0 ? "" : node.objectId.ToStringAsHex());
+		item.label = node.name + " / " + (node.objectId == 0 ? "" : node.objectId.ToFingerprintString());
 		// 	Debug.Log("filling " + item.label);
 	}
 

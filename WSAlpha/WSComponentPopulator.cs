@@ -15,15 +15,15 @@ public class WSComponentPopulator : MonoBehaviour
 	public WSObjectReferencingClient wsClient;
 	// ulong displayingID;
 	public Text labeltext;
-	 void AddComponentField( UIPrefabHelper prefabs, MemberInstanceLink memberDescription)
+	 void AddComponentField( UIPrefabHelper prefabs, ValueProxy memberDescription)
 	{
-		
 		switch(memberDescription.fieldType)
 		{
 			case MemberDescription.FieldType.FloatField:
 			{
 				var slider=prefabs.GetSlider(memberDescription.baseName);
 				ValueRemote value=new ValueRemote(memberDescription);
+				Debug.Log("memberId "+memberDescription.memberId+"  +memberId"+value.memberId );
 				value.BindSlider(slider);
 
 			}

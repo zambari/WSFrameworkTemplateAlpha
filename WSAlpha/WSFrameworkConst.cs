@@ -23,7 +23,7 @@ namespace WSFrameworkConst
 		public static readonly Color serviceNameColor = new Color(.2f, .6f, .8f);
 		public static readonly Color serviceMessageColor = new Color(.5f, .2f, .9f);
 		public static readonly Color clientUsingServiceNameColor = new Color(.2f, .5f, .1f);
-		public static readonly Color clientUsingServiceNameMssage = new Color(.3f, .3f, .5f);
+		public static readonly Color clientUsingServiceNameMssage = new Color(.3f, .8f, .5f);
 		public static readonly Color connectionMessage = new Color(0, .9f, .2f);
 		public static readonly Color disconnectionMessage = new Color(.6f, .1f, .1f);
 		public static string GetAddressFor(this TRSReportLevel level)

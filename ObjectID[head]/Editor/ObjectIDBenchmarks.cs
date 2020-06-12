@@ -46,8 +46,8 @@ namespace Z.ObjectID
         [UnityEditor.MenuItem("Tools/ObjectID/Benchmark GensomeIds")]
         static void GensomeIds()
         {
-       //   ObjectID.ResetIncremental();
-       //     ObjectID.ResetIncremental();
+            //   ObjectID.ResetIncremental();
+            //     ObjectID.ResetIncremental();
             GameObject[] g = UnityEditor.Selection.gameObjects;
             int read = 0;
             if (g == null)
@@ -65,10 +65,13 @@ namespace Z.ObjectID
                     //incrementedOnIDGeneration += 2;
                     rando = (Int32) UnityEngine.Random.Range(0, System.Int32.MaxValue);
                 }
-                ulong id = ObjectIDExtensions.CreateNewTimeAndInstanceBasedIdentifier(rando);
+                // ulong id = ObjectIDExtensions.CreateNewTimeAndInstanceBasedIdentifier(rando);
+                // id = id.PackInUpper();
+                
+                ulong id = ObjectIDExtensions.GetWhatevID(g[0]);
                 read++;
                 if (read >= g.Length) read = 0;
-                Debug.Log(i + "  " + id.ToColorfulString());
+                Debug.Log(i + "         " + id.ToFingerprintString(true) + "                                    " + id.ToColorfulString() ); //
             }
 
         }
@@ -106,7 +109,7 @@ namespace Z.ObjectID
             // zBench.Start("stringbuilder");
             // for (int i = 0; i < benchount; i++)
             // 	cnt += naive(id++).Length;
-            // zBench.EndMillis("naive", " cnt=" + cnt + " id " + id.ToFingerprintString());
+            // zBench.EndMillis("naive", " cnt=" + cnt + " id " + id.ToFingerprintString(true));
             // cnt = 0;
 
             zBench.Start("aloc1");
@@ -157,7 +160,7 @@ namespace Z.ObjectID
             // zBench.Start("stringbuilder");
             // for (int i = 0; i < benchount; i++)
             // 	cnt += naive(id++).Length;
-            // zBench.EndMillis("naive", " cnt=" + cnt + " id " + id.ToFingerprintString());
+            // zBench.EndMillis("naive", " cnt=" + cnt + " id " + id.ToFingerprintString(true));
             // cnt = 0;
 
             zBench.Start("mixed");
@@ -175,7 +178,7 @@ namespace Z.ObjectID
             zBench.Start("stringbuilder");
             for (int i = 0; i < benchount; i++)
                 cnt += stribgu(id++).Length;
-            zBench.EndMillis("stringbuilder", " cnt=" + cnt + " id " + id.ToFingerprintString());
+            zBench.EndMillis("stringbuilder", " cnt=" + cnt + " id " + id.ToFingerprintString(true));
         }
 
         public static string bToStringAsHex(this ulong identifier, bool reverse = true)

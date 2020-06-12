@@ -17,7 +17,7 @@ public class WSValueClient : WSOSCClient
 		}
 		instance=this;
 	}
-	public static void RequestValueChange(ulong valueID, float val)
+	public static void RequestValueChange(int valueID, float val)
 	{
 		OSCMessage msg=new OSCMessage(Const.valueOSC);
 		msg.Append(valueID);

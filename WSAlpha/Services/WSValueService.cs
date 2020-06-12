@@ -24,9 +24,13 @@ public class WSValueService : WSOSCService
 		string address = message.Address;
 		if (address.StartsWith(Const.valueOSC))
 		{
-			ulong valueid = message.GetULong(0);
+			int memberId = message.GetInt(0);
+			var proxy = ValueProxy.GetProxyFromDict(memberId);
+			// tu slownik
+
 			float value = message.GetFloat(1);
-			var proxy = ValueProxy.GetProxyFromDict(valueid);
+			DebugService("valueservice full adderss is " + address + " typetag " + message.typeTag + " vali " + memberId.ToColorfulString());
+
 			if (proxy == null)
 			{
 				Debug.Log("no proxy");
@@ -35,7 +39,7 @@ public class WSValueService : WSOSCService
 			{
 				proxy.SetFloat(value);
 			}
-			DebugService("is value frame " + valueid.ToColorfulString() + " " + value);
+			DebugService("is value frame " + memberId.ToColorfulString() + " " + value);
 		}
 
 	}
@@ -47,7 +51,7 @@ public class WSValueService : WSOSCService
 		{
 			if (p.HasValueChanged())
 			{
-				
+
 			}
 
 		}

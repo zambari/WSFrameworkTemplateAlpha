@@ -56,7 +56,6 @@ public static class ObjectIDExtensions
         if (source == null) return 0;
         return GetObjectID(source.transform);
     }
-
     static System.Random _random;
     public static System.Random random
     {
@@ -88,7 +87,8 @@ public static class ObjectIDExtensions
     public static ulong GetWhatevID(GameObject source)
     {
 #if UNITY_EDITOR
-        ulong newidentifier = ObjectIDExtensions.CreateNewTimeAndInstanceBasedIdentifierFromObject(source); // in editopr we take time and instance id
+        //ulong newidentifier = ObjectIDExtensions.CreateNewTimeAndInstanceBasedIdentifierFromObject(source); // in editopr we take time and instance id
+        ulong newidentifier = ObjectIDExtensions.CreateNewTimeAndInstanceBasedIdentifier(0); // in editopr we take time and instance id
 #else
         ulong newidentifier = ObjectIDExtensions.CreateHierarchyBasedIdentified(source, 0);
 #endif
@@ -96,6 +96,7 @@ public static class ObjectIDExtensions
     }
     public static bool CreateAndValidateIdentifier(ObjectID obj)
     {
+        //   if (obj==null) return false;
         ulong newidentifier = 0;
         for (int i = 0; i < 5; i++)
         {
@@ -106,7 +107,8 @@ public static class ObjectIDExtensions
                     return true;
                 else
                 {
-                    Debug.Log(obj.name + " failed registering " + newidentifier.ToFingerprintString() + " occupied by " + newidentifier.FindTransform().name);
+                    var nt = newidentifier.FindTransform();
+                    Debug.Log(obj.name + " failed registering " + newidentifier.ToFingerprintString() + " occupied by " + (nt == null? " no one apparently ": nt.name), obj.gameObject);
                 }
             } /// outside edito we try to use hierarchys
             // id = id & mask;
@@ -128,7 +130,26 @@ public static class ObjectIDExtensions
         ulong id = GetHashFromString(nameChain);
         return id;
     }
+    public static ulong PackInUpper(this ulong source)
+    {
+        var bytes = BitConverter.GetBytes(source);
+        byte a = (byte) (bytes[7] + bytes[0]);
+        byte b = (byte) (bytes[6] + bytes[1]);
+        byte c = (byte) (bytes[5] + bytes[2]);
+        byte d = (byte) (bytes[4] + bytes[3]);
 
+        bytes[7] = d;
+        bytes[6] = c;
+        bytes[5] = b;
+        bytes[4] = a;
+        bytes[3] = 0;
+        bytes[2] = 0;
+        bytes[1] = 0;
+        bytes[0] = 0;
+        ulong vOut = BitConverter.ToUInt64(bytes, 0);
+        return vOut; // Convert.ToUInt64(bytes);
+
+    }
     public static ulong CreateNewTimeAndInstanceBasedIdentifier(Int32 instanceid)
     {
         ulong newId = ((ulong) (System.DateTime.Now.Ticks >> 16 & (System.Int32.MaxValue >> 1))) << 32; //^ g.GetInstanceID()
@@ -160,12 +181,12 @@ public static class ObjectIDExtensions
         //   Debug.Log(newId.ToFingerprintString() + " creatbg   x  " + ((ulong) (x)).ToFingerprintString() + "     " + "  y  " + ((ulong) (y)).ToStringAsHex() + "     ");
         //           Debug.Log(" tick " + newId.ToFingerprintString() + "   x  " + newId.ToStringAsHex() + "     " + newId);
 
-        return newId;
+        return newId.PackInUpper();
     }
-    public static ulong CreateNewTimeAndInstanceBasedIdentifierFromObject(GameObject g)
-    {
-        return CreateNewTimeAndInstanceBasedIdentifier(g.GetInstanceID());
-    }
+    // public static ulong CreateNewTimeAndInstanceBasedIdentifierFromObject(GameObject g)
+    // {
+    //     return CreateNewTimeAndInstanceBasedIdentifier(g.GetInstanceID());
+    // }
 
     public static ulong GetHashFromString(this string s)
     {
@@ -187,10 +208,10 @@ public static class ObjectIDExtensions
     //     if (obj == null) return 0;
     //     return obj.identifier;
     // }
-    public static ulong GetObjectIDForced(this Component source)
-    {
-        return GetObjectIDForced(source.transform);
-    }
+    // public static ulong GetObjectIDForced(this Component source)
+    // {
+    //     return GetObjectIDForced(source.transform);
+    // }
     public static ulong GetObjectID(this Transform source)
     {
         var obj = source.GetComponent<ObjectID>();
@@ -198,11 +219,11 @@ public static class ObjectIDExtensions
         if (obj == null) return 0;
         return obj.identifier;
     }
-    public static ulong GetObjectIDForced(this Transform source)
-    {
-        var obj = source.AddOrGetComponent<ObjectID>();
-        return obj.identifier;
-    }
+    // public static ulong GetObjectIDForced(this Transform source)
+    // {
+    //     var obj = source.AddOrGetComponent<ObjectID>();
+    //     return obj.identifier;
+    // }
     public static string ToStringAsHex(this ulong identifier, bool reverse = true)
     {
         var bytes = BitConverter.GetBytes(identifier);
@@ -215,13 +236,48 @@ public static class ObjectIDExtensions
         }
         return sb.ToString();
     }
+    static readonly float bytdiv = 1.3f / System.Byte.MaxValue; // skewed
     public static string ToNiceString(this ulong identifier)
     {
         return ToStringAsHex(identifier);
     }
-    public static string ToFingerprintString(this ulong identifier)
+    public static Color GetColorFromByte(byte thisbyte)
     {
-        return ToColorfulString(identifier);
+
+        float b = bytdiv * (((byte) (thisbyte >> 4)) << 4);
+        float g = bytdiv * ((byte) (thisbyte << 4));
+        // thisColor.g =0;
+        float r = b * g;
+        return new Color(r, g, b);
+    }
+    public static string ToFingerprintString(this ulong identifier, bool colorful = false)
+    {
+        if (identifier == 0) return "[        no.id       ]";
+
+        var bytes = BitConverter.GetBytes(identifier);
+        // bytes[0] += bytes[7];
+        // bytes[1] += bytes[6];
+        // bytes[2] += bytes[5];
+        // bytes[3] += bytes[4];
+        string s = "[";
+
+        for (int i = 7; i >= 4; i--)
+        {
+            byte thisbyte = bytes[i];
+            if (colorful)
+            {
+                Color thisColor = GetColorFromByte(thisbyte);
+                s += " " + thisbyte.ToString("X2").MakeColor(thisColor);
+            }
+            else
+            {
+                s += " " + thisbyte.ToString("X2");
+            }
+        }
+        s += " ]";
+        byte rest = (byte) (bytes[0] + bytes[1] + bytes[2] + bytes[3]);
+        s += " [" + rest.ToString("X2").MakeColor(GetColorFromByte(rest)) + "] ";
+        return s.Small();
         // if (identifier == 0) return "[no id]";
         // var bytes = BitConverter.GetBytes(identifier);
         // string rs = "-";
@@ -240,43 +296,40 @@ public static class ObjectIDExtensions
         // }
         // return rs;
     }
-    public static string ToColorfulString(this ulong identifier, int steps = 3)
+    static readonly Color faded = Color.white * .35f;
+    static readonly Color faded2 = Color.white * .85f;
+    static readonly string leftbracketa = "[".MakeColor(faded);
+    static readonly string rightbrackera = "]".MakeColor(faded);
+    static readonly string leftbracketb = "[".MakeColor(faded2);
+    static readonly string rightbrackerb = "]".MakeColor(faded2);
+
+    public static string ToColorfulString(this byte[] bytes)
     {
-        if (identifier == 0) return "[        no id       ]";
-        var bytes = BitConverter.GetBytes(identifier);
         string rs = "";
-        // float byteDiv = 1f / (256);
-        Color faded = Color.white * .35f;
-        string leftbracketa = "[".MakeColor(faded);
-        string rightbrackera = "]".MakeColor(faded);
-        faded = Color.white * .85f;
-        string leftbracketb = "[".MakeColor(faded);
-        string rightbrackerb = "]".MakeColor(faded);
-        // float r = .5f;
-        // float g = .5f;
-        // float b = .5f;
-        Color Start = new Color32((byte) (bytes[0] ^ bytes[3]), bytes[1], bytes[2], 255);
-        Color End = new Color32(bytes[7], (byte) (bytes[6] ^ bytes[3]), bytes[5], 255);
-
-        for (int i = 7; i >= 0; i--)
+        for (int i = bytes.Length - 1; i >= 0; i--)
         {
-            // if (i < 4)
-            //     r = byteDiv * bytes[i / 4];
-            // if (i > 5)
-            //     g = byteDiv * bytes[((i) / 4 + 2) % 8];
-            // b = byteDiv * bytes[((i) / 4 + 5) % 8];
 
-            // float bri=bytes[i] * byteDiv * .6f + .2f;
-            float bri = bytes[i] * 1.5f / 256;
-            bri *= bri;
-            bri *= 2;
-            Color color1 = Color.Lerp(Start, End, i * (1 / 8f)); //(new Color(r, g, b)
-            Color color = color1.SaturationAndBrigntessAdjust(.6f, bri);
             bool odd = i % 4 < 2;
+            Color color = GetColorFromByte(bytes[i]);
             string bytestring = (bytes[i].ToString("X2")).MakeColor(color);
             rs += (odd ? leftbracketa : leftbracketb) + bytestring + (odd ? rightbrackera : rightbrackerb);
         }
-        return rs;
+        return rs.Small();
+    }
+    public static string ToColorfulString(this ulong identifier)
+    {
+        if (identifier == 0) return "[        no id       ]";
+        var bytes = BitConverter.GetBytes(identifier);
+        return ToColorfulString(bytes);
+
+    }
+
+    public static string ToColorfulString(this int intId)
+    {
+        // if (identifier == 0) return "[        no id       ]";
+        var bytes = BitConverter.GetBytes(intId);
+        return ToColorfulString(bytes);
+
     }
     public static string ToStringAsHexA(byte[] bytes, bool reverse = true)
     {

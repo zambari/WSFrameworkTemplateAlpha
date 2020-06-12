@@ -125,7 +125,7 @@ public abstract class WSClientBase : MonoBehaviour
 
 	protected void DebugClient(string s, GameObject g = null)
 	{//WSServer.frameCount +
-		Debug.Log("C "+ serviceName.MakeColor(Const.clientUsingServiceNameColor).Small() + " " + s.MakeColor(Const.clientUsingServiceNameMssage).Small(), myGameObject);
+		Debug.Log("c "+ serviceName.MakeColor(Const.clientUsingServiceNameColor).Small() + " " + s.MakeColor(Const.clientUsingServiceNameMssage).Small(), myGameObject);
 	}
 	protected void DebugClientNonColor(string s, GameObject g = null)
 	{
