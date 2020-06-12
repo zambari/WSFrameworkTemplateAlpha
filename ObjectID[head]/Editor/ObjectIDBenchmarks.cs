@@ -41,14 +41,13 @@ namespace Z.ObjectID
                 Debug.Log(((ulong) (id.Compact())).ToColorfulString());
 
             }
-
         }
 
         [UnityEditor.MenuItem("Tools/ObjectID/Benchmark GensomeIds")]
         static void GensomeIds()
         {
-            ObjectIDExtensions.yetanothercounter = 0;
-
+       //   ObjectID.ResetIncremental();
+       //     ObjectID.ResetIncremental();
             GameObject[] g = UnityEditor.Selection.gameObjects;
             int read = 0;
             if (g == null)

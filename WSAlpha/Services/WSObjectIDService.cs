@@ -9,10 +9,15 @@ using Z.Reflection;
 
 public class WSObjectIDService : WSOSCService
 {
-
+	public bool selectLastObjectInEditor = true;
 	protected virtual void OnObjectIDTargettingMessage(WSServiceBehaviour beh, Transform targettedTransform, ulong id, OSCMessage message, string currentOSCAddress)
 	{
-
+#if UNITY_EDITOR
+		if (selectLastObjectInEditor)
+		{
+			UnityEditor.Selection.activeGameObject = targettedTransform.gameObject;
+		}
+#endif
 		if (currentOSCAddress.StartsWith(Const.objectComponentsDetailsAddress))
 		{
 			DebugService("currentOSCAddress " + currentOSCAddress + "    " + currentOSCAddress.OSCFollowingSemgents());
@@ -116,9 +121,9 @@ public class WSObjectIDService : WSOSCService
 			Debug.Log("invalid compnnet refernee");
 		}
 		OSCMessage message = new OSCMessage(Const.objectIDKeywordAddress + Const.objectComponentsDetailsAddress);
-			ComponentDescriptor descriptor = ComponentDescriptor.GetDescriptor(c.GetType());
+		ComponentDescriptor descriptor = ComponentDescriptor.GetDescriptor(c.GetType());
 		descriptor.ReadValues(c);
-		var desc=descriptor.GetVisibleAsJson(oid,c);
+		var desc = descriptor.GetVisibleAsJson(oid, c);
 		message.Append(desc);
 		// DebugService(" sending json  " + desc);
 		beh.Send(message);

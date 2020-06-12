@@ -6,40 +6,51 @@ using Z.Reflection;
 
 public class ValueProxy
 {
-
-	
-	static System.Int32 _lastindex;
-	public static System.Int32 nextValueIndex { get { return _lastindex++; } }
-	/// <summary>
-	/// Compacts provided id and fills the freed bits with index it increases
-	/// </summary>
-	public static ulong MakeValueUnique(ulong id)
-	{
-		return id.Compact() | (ulong) (long) nextValueIndex;
-	}
 	MemberInstanceLink linkreference;
 	object objectReference;
-	public ValueProxy(MemberInstanceLink link,object obj)
+	public string name;
+	object lastValue;
+	public bool HasValueChanged()
 	{
-		linkreference = link;
-		objectReference=obj;
-	}
-	public void SetFloat(  float f)
-	{	
-		Debug.Log("seting float " + f);
-		linkreference.SetFloat(objectReference,f);
-		
+		object val = linkreference.GetObject(objectReference);
+		if (lastValue != val)
+		{
+			Debug.Log(" value hasn changed " + name);
+			return true;
+		}
+		else
+		{
+			Debug.Log(" value hasn't changed " + name);
+			return false;
+		}
 	}
 
+	public ValueProxy(MemberInstanceLink link, object obj)
+	{
+		linkreference = link;
+		objectReference = obj;
+	}
+	public void SetFloat(float f)
+	{
+		Debug.Log("seting float " + f);
+		linkreference.SetFloat(objectReference, f);
+	}
+	public float GetFloat()
+	{
+		return linkreference.GetFloat(objectReference);
+	}
 	public static Dictionary<ulong, ValueProxy> proxyDict;
+	public static List<ValueProxy> activeProxies = new List<ValueProxy>();
 	public static void RegisterProxy(ulong valueid, ValueProxy proxy)
 	{
 		if (proxyDict == null) proxyDict = new Dictionary<ulong, ValueProxy>();
 		proxyDict.Add(valueid, proxy);
-		Debug.Log("registered proxy for " + valueid.ToColorfulString());
+		if (!activeProxies.Contains(proxy)) activeProxies.Add(proxy);
+		Debug.Log("registered proxy for " + valueid.ToColorfulString() + " proxy " + proxy.name);
 	}
-	public static ValueProxy GetProxy(ulong valueidy)
+	public static ValueProxy GetProxyFromDict(ulong valueidy)
 	{
+
 		if (proxyDict == null) proxyDict = new Dictionary<ulong, ValueProxy>();
 		ValueProxy value = null;
 		if (proxyDict.TryGetValue(valueidy, out value))

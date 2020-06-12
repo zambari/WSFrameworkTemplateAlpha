@@ -9,19 +9,12 @@ using UnityEditor;
 // v0.03/02 UNDO
 // v0.04 namespac
 // v0.05 UNITYEDITOR FFS
+// v0.06 removed some menu entries
 namespace Z
 {
     public static class ObjectEnableToggle
     {
-        /*  [MenuItem("Tools/Actions/Select Parent %`")] 
-           static void selParent()
-           {
-               if (Selection.activeGameObject != null && Selection.activeGameObject.transform.parent!=null)
-               {
-
-                  Selection.activeGameObject=Selection.activeGameObject.transform.parent.gameObject;
-               }
-           }*/
+    
         static GameObject selectedObject;
         [MenuItem("Tools/Actions/Toggle Enabled  _`")]
         static void ToggleEnabled()
@@ -33,7 +26,7 @@ namespace Z
                     ToggleActiveStatus(Selection.gameObjects[i], newActiveStatus);
             }
         }
-        [MenuItem("Tools/Actions/Select favourite Togglable object  _%#`")]
+   //     [MenuItem("Tools/Actions/Select favourite Togglable object  _%#`")]
         static void SelectTogglable()
         {
             if (Selection.activeGameObject != null)
@@ -42,7 +35,7 @@ namespace Z
                 Debug.Log(selectedObject.name + " was marked for control tilde toggle");
             }
         }
-        [MenuItem("Tools/Actions/Toggle favourite object  _#`")]
+    //    [MenuItem("Tools/Actions/Toggle favourite object  _#`")]
         static void SelectedTogglableToggle()
         {
             if (selectedObject != null)

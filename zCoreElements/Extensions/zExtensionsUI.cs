@@ -1,12 +1,11 @@
-﻿
-
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using UnityEngine;
-using System;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+using zUI;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -45,15 +44,29 @@ public static class zExtensionsUI
             Debug.Log("No toggle reference");
         return toggle;
     }
+    /// <summary>
+    /// Null safe version of text=number
+    /// </summary>
     public static void SetText(this Text text, int s)
     {
         if (text != null) text.SetText(s.ToString());
 
     }
-
+    /// <summary>
+    /// Null safe version of text=text
+    /// </summary>
     public static void SetText(this Text text, string s)
     {
         if (text != null) text.text = s;
+    }
+    /// <summary>
+    /// looks for smartui base, sets text if found
+    /// </summary>
+
+    public static void SetLabel(this Component source, string s)
+    {
+        var smartui = source.GetComponent<SmartUIBase>();
+        if (smartui != null) smartui.label = s;
     }
 
     public static LayoutElement[] GetActiveElements(this HorizontalLayoutGroup layout)
@@ -90,7 +103,6 @@ public static class zExtensionsUI
     //     return r;
     // }
 
-
     public static Texture2D Create(this Texture2D t, Color fillColor, int sixeX = 1, int sizeY = 1) //, bool apply=true
     {
         Texture2D texture = new Texture2D(sixeX, sizeY);
@@ -121,7 +133,6 @@ public static class zExtensionsUI
             colors[i] = colors[i] + fillColor;
         texture.SetPixels32(colors);
         texture.Apply();
-
 
     }
 

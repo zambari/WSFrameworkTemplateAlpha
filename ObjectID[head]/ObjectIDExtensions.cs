@@ -23,13 +23,6 @@ public interface IProvideLabel
 public static class ObjectIDExtensions
 {
 
-    // public static class ObjectIdEtensions
-    // {
-public static ulong Compact(this ulong id)
-{
-    return ((ulong)((Int32)( id ^ (id>>32)))<<32);
-}
-    static byte[] bytes = new byte[8];
     public static ulong GetID(this GameObject g)
     {
         var id = g.GetComponent<ObjectID>();
@@ -77,7 +70,16 @@ public static ulong Compact(this ulong id)
             return _random;
         }
     }
+    public static ulong Compact(this ulong id)
+    {
+        return ((ulong) ((Int32) (id ^ (id >> 32))) << 32);
+    }
 
+    public static ulong MergeWithInt(this ulong id, int value) //nextValueIndex
+    {
+        return id.Compact() | (ulong) (long) value;
+    }
+    static byte[] bytes = new byte[8];
     public static ulong ObtainRandomme()
     {
         random.NextBytes(bytes);
@@ -88,7 +90,7 @@ public static ulong Compact(this ulong id)
 #if UNITY_EDITOR
         ulong newidentifier = ObjectIDExtensions.CreateNewTimeAndInstanceBasedIdentifierFromObject(source); // in editopr we take time and instance id
 #else
-        ulong newidentifier = ObjectIDExtensions.CreateHierarchyBasedIdentified(source);
+        ulong newidentifier = ObjectIDExtensions.CreateHierarchyBasedIdentified(source, 0);
 #endif
         return newidentifier;
     }
@@ -126,7 +128,7 @@ public static ulong Compact(this ulong id)
         ulong id = GetHashFromString(nameChain);
         return id;
     }
-    public static int yetanothercounter = 0;
+
     public static ulong CreateNewTimeAndInstanceBasedIdentifier(Int32 instanceid)
     {
         ulong newId = ((ulong) (System.DateTime.Now.Ticks >> 16 & (System.Int32.MaxValue >> 1))) << 32; //^ g.GetInstanceID()
@@ -134,8 +136,6 @@ public static ulong Compact(this ulong id)
         //      newId=newId|(UInt64)(long)(yetanothercounter<<56);
         ulong truncatedInstancid = (ulong) instanceid; // & 0b111111111111111;
         //incrementedOnIDGeneration += 2;
-        //truncatedInstancid=(ulong)UnityEngine.Random.Range(0,System.Int32.MaxValue);
-        yetanothercounter++;
 
         truncatedInstancid = (truncatedInstancid >> 16) ^ truncatedInstancid;
         //   truncatedInstancid = truncatedInstancid ^( (truncatedInstancid >> 3)^(truncatedInstancid << 3) ) ;//^ (truncatedInstancid << 3);
@@ -152,7 +152,7 @@ public static ulong Compact(this ulong id)
         //truncatedInstancid=(truncatedInstancid>>16^  truncatedInstancid )<<16;
 
         // truncatedInstancid=truncatedInstancid;
-        newId = newId | (UInt32) (truncatedInstancid | (ulong)(long) yetanothercounter);
+        newId = newId | (UInt32) (truncatedInstancid | (ulong) (long) ObjectID.incremental);
         // newId = 0 |( (ulong) ((yetanothercounter) << 16)) |(ulong)(long)( truncatedInstancid);
 
         // UInt32 x = (UInt32) (truncatedInstancid + (int) yetanothercounter);
@@ -278,7 +278,7 @@ public static ulong Compact(this ulong id)
         }
         return rs;
     }
-    public static string ToStringAsHexA(byte[] bytes, bool reverse)
+    public static string ToStringAsHexA(byte[] bytes, bool reverse = true)
     {
         string idStringPartA = "";
         if (reverse)
@@ -289,7 +289,7 @@ public static ulong Compact(this ulong id)
                 idStringPartA += "[" + bytes[i].ToString("X2") + "]";
         return idStringPartA;
     }
-    public static string ToStringAsHexB(byte[] bytes, bool reverse)
+    public static string ToStringAsHexB(byte[] bytes, bool reverse = true)
     {
         string idStringPartB = "";
         if (reverse)
@@ -346,13 +346,6 @@ public static ulong Compact(this ulong id)
         }
     }
 
-    // [MenuItem("Tools/ObjectID/Randomize objectid seed")]
-
-    // static void NewId()
-    // {
-    //     ObjectID.Seed(UnityEngine.Random.Range(0, System.Int32.MaxValue));
-    //     Debug.Log("randomized seed for objid ");
-    // }
     static int addedCounter;
     static int foundCounter;
     //static int incrementedOnIDGeneration;

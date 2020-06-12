@@ -30,6 +30,7 @@ public class ValueRemote
 		}
 		slider.value = link.lastValue;
 		slider.onValueChanged.AddListener(OnSliderMove);
+		slider.SetLabel(link.baseName);
 	}
 	void OnSliderMove(float f)
 	{

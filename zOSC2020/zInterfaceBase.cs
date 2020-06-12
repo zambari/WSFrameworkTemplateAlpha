@@ -5,7 +5,9 @@ using UnityEngine.UI;
 
 namespace Z
 {
-	public interface UnityBaseInterface
+	[System.Obsolete]
+	public interface UnityBaseInterface: zInterfaceBase {}
+	public interface zInterfaceBase
 	{
 		GameObject gameObject { get; }
 		string name { get; }

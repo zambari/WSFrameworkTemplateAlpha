@@ -42,11 +42,13 @@ public ComponentDescriptorWithHandles(ulong id)
 			{
 				if (members[i].show)	
 				{
-					ulong thisid=ValueProxy.MakeValueUnique(baseId);
+					ulong thisid= baseId.MergeWithInt(ObjectID.incremental);// ValueProxy.MakeValueUnique(baseId);
 					
 					var thisInstanceMember= new MemberInstanceLink(members[i],thisid);
 					var thisProxy=new ValueProxy(thisInstanceMember,c);
+					thisProxy.name = members[i].baseName; // gameobject names
 					ValueProxy.RegisterProxy(thisid,thisProxy);
+					thisInstanceMember.hasOnValidateNew=hasOnValidate;
 					newDescriptor.memberInstances.Add(thisInstanceMember);
 				}
 			}

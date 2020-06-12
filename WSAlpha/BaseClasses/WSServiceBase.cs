@@ -103,7 +103,7 @@ public abstract class WSServiceBase : MonoBehaviour
 
 	protected void DebugService(string s)
 	{
-		Debug.Log("S "+serviceName.MakeColor(Const.serviceNameColor) + " " + s.MakeColor(Const.serviceMessageColor), myGameObject);
+		Debug.Log("S "+serviceName.MakeColor(Const.serviceNameColor) .Small()+ " " + s.MakeColor(Const.serviceMessageColor), myGameObject);
 	}
 
 	protected virtual void OnEnable()
