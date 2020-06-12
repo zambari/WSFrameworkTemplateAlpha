@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-namespace Z.Reflection
+namespace Z.Reflection //Z.Reflection.TypeUtility.GetTypeByName(string name)
 {
 	public static class TypeUtility //fromsomeowhere
 	{
@@ -18,7 +18,7 @@ namespace Z.Reflection
 			return list.ToArray();
 		}
 
-		public static Type GetTypeByName(string name)
+		public static Type GetTypeByName(string name) //from stack
 		{
 			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
 				foreach (Type type in assembly.GetTypes())

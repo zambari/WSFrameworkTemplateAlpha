@@ -41,7 +41,10 @@ public class WSHierarchyService : WSOSCService
 		var transformList = new List<Transform>();
 		foreach (var t in alltransforms)
 		{
-			if (t.parent == null) // t.hideFlags == HideFlags.None // layer
+			if (t.parent == null &&
+				t.hideFlags == HideFlags.None 
+				// layer
+			)
 			{
 				transformList.Add(t);
 			}
@@ -56,10 +59,10 @@ public class WSHierarchyService : WSOSCService
 		OSCMessage message = new OSCMessage(oscRequest);
 		message.Append(serializerResponse);
 		beh.Send(message);
-		Debug.Log(" our message has " + message.BinaryData.Length + " bytes");
+		// Debug.Log(" our message has " + message.BinaryData.Length + " bytes");
 		stopwatch.Stop();
-		DebugService("found " + transformList.Count + " root transforms");
-		DebugService("Ellapses " + stopwatch.ElapsedMilliseconds + " ms /" + stopwatch.ElapsedTicks + "/ticks");
+		// DebugService("found " + transformList.Count + " root transforms");
+		// DebugService("Ellapses " + stopwatch.ElapsedMilliseconds + " ms /" + stopwatch.ElapsedTicks + "/ticks");
 	}
 
 }

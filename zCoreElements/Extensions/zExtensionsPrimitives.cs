@@ -70,7 +70,7 @@ public static class zExtensionPrimitives
     }
     public static string Small(this string s)
     {
-        return "<size=10>" + s + "</size>";
+        return "<size=9>" + s + "</size>";
     }
     public static string MakeWhite(this string s, float brightness = 0.9f)
     {

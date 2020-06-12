@@ -14,9 +14,12 @@ public abstract class WSOSCClient : WSClientBase
 		// statsSumary.AddBytesRecieved(message.RawData.Length);
 		OSCPacket oscpacket = OSCPacket.Unpack(message.RawData);
 
-		if (oscpacket.Address == "/message")
+		if (oscpacket.Address.EndsWith("/message"))
 		{
-			DebugClient("recieved messaget " + oscpacket.GetString(0));
+			if (oscpacket.typeTag[0] == 'u')
+				DebugClient(oscpacket.Address + " MESSAGE recieved with ID:  " + oscpacket.GetULong(0));
+			if (oscpacket.typeTag[0] == 's')
+				DebugClient(oscpacket.Address + " MESSAGE recieved  " + oscpacket.GetString(0));
 		}
 		if (oscpacket != null)
 		{

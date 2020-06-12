@@ -14,6 +14,33 @@ public class WSHierarchyResponse : WSFrameworkMessage
 }
 
 [System.Serializable]
+public class GameObjectInfo // : WSFrameworkMessage
+{
+	public string name;
+	public ulong id;
+	public bool isActive;
+	public string[] componentNames;
+	public GameObjectInfo(GameObject g)
+	{
+		GetInfo(g);
+	}
+	void GetInfo(GameObject g)
+	{
+		name = g.name;
+		id = g.GetID();
+		isActive = g.activeSelf;
+		var comps = g.GetComponents<Component>();
+		componentNames = new string[comps.Length];
+		for (int i = 0; i < comps.Length; i++)
+			componentNames[i] = comps[i].GetType().ToString();
+	}
+	public GameObjectInfo(Transform t)
+	{
+		GetInfo(t.gameObject);
+	}
+}
+
+[System.Serializable]
 public class TransformNodeInfo
 {
 	public string name;
@@ -26,7 +53,7 @@ public class TransformNodeInfo
 		layer = src.gameObject.layer;
 		name = src.name;
 		objectId = src.GetObjectID(true);
-		hideFlags =(int) src.gameObject.hideFlags;
+		hideFlags = (int) src.gameObject.hideFlags;
 	}
 }
 

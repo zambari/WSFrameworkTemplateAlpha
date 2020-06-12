@@ -6,38 +6,57 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace Z.Reflection
 {
+
 	[System.Serializable]
-	public class ComponentDescriptor
+	public class ComponentDescriptorWithHandles : ComponentDescriptorBase
 	{
-		public string typeName;
-		Type _type;
-		public Type type
-		{
-			get
-			{
-				if (string.IsNullOrEmpty(typeName)) return default(Type);
-				if (_type == null) _type = TypeUtility.GetTypeByName(typeName);
-				return _type;
-			}
-		}
-		public bool hasOnValidate;
+		public ulong objectID;
+
+public ComponentDescriptorWithHandles(ulong id)
+{
+	objectID=id;
+}
+		public List<MemberInstanceLink> memberInstances;
+	}
+
+	[System.Serializable]
+	public class ComponentDescriptor : ComponentDescriptorBase
+	{
+
 		public List<MemberDescription> members;
 		public Component referenceObject;
+		static string componentPath = "ComponentInfos";
 
-		public string GetVisibleAsJson()
+		// public string GetVisibleAsJson(GameObject referenceObject)
+		// {
+		// 	return GetVisibleAsJson(referenceObject.GetID());
+		// }
+		public string GetVisibleAsJson(ulong id,Component c)
 		{
-			var newDescriptor = new ComponentDescriptor();
+			var newDescriptor = new ComponentDescriptorWithHandles(id);
+			ulong baseId = id.Compact();
 			newDescriptor.typeName = typeName;
-			newDescriptor.members = new List<MemberDescription>(members);
-			newDescriptor.hasOnValidate = hasOnValidate;
-			for (int i = newDescriptor.members.Count - 1; i >= 0; i--)
+			newDescriptor.memberInstances = new List<MemberInstanceLink>();
+
+			for (int i=0;i<members.Count;i++)
 			{
-				if (!newDescriptor.members[i].show)
+				if (members[i].show)	
 				{
-					newDescriptor.members.RemoveAt(i);
+					ulong thisid=ValueProxy.MakeValueUnique(baseId);
+					
+					var thisInstanceMember= new MemberInstanceLink(members[i],thisid);
+					var thisProxy=new ValueProxy(thisInstanceMember,c);
+					ValueProxy.RegisterProxy(thisid,thisProxy);
+					newDescriptor.memberInstances.Add(thisInstanceMember);
 				}
 			}
-			return JsonUtility.ToJson(newDescriptor);
+			newDescriptor.hasOnValidate = hasOnValidate;
+			
+			return JsonUtility.ToJson(newDescriptor   //line breaks #iffed
+#if UNITY_EDITOR
+				, true //faster in builds
+#endif
+			);
 		}
 		private ComponentDescriptor() {}
 		public static ComponentDescriptor GetDescriptor(string t)
@@ -52,12 +71,12 @@ namespace Z.Reflection
 			ComponentDescriptor descriptor = null;
 			if (descriptionDict.TryGetValue(t, out descriptor))
 			{
-				Debug.Log("found in dictionary");
+				Debug.Log("found component desciptor for typ "+t.ToString()+" in dictionary");
 				return descriptor;
 			}
 			else
 			{
-				Debug.Log("not found in dict");
+				Debug.Log("not found in dict "+t);
 			}
 			var loadpath = GetSaveLoadPath(t.ToString());
 			if (System.IO.File.Exists(loadpath))
@@ -71,10 +90,15 @@ namespace Z.Reflection
 					descriptionDict.Add(t, loading);
 					return loading;
 				}
-			};
+			}
+			else
+			{
+				Debug.Log("does not exis creating desc for "+t);
+			}
 			descriptor = new ComponentDescriptor();
 			descriptor.Scan(t);
 			descriptionDict.Add(t, descriptor);
+			Debug.Log("scan for "+t+"shows " + descriptor.members.Count + " members");
 			return descriptor;
 		}
 		public void ReadValues(Component src)
@@ -145,10 +169,9 @@ namespace Z.Reflection
 				}
 			}
 			sw.Stop();
-			Debug.Log("elasped " + sw.ElapsedMilliseconds);
+			Debug.Log("scan finihed elasped " + sw.ElapsedMilliseconds);
 
 		}
-		static string componentPath = "ComponentInfos";
 		static string GetSaveLoadPath(string typeName)
 		{
 
@@ -173,5 +196,22 @@ namespace Z.Reflection
 			Debug.Log("saved as " + GetSaveLoadPath(typeName));
 
 		}
+	}
+
+	[System.Serializable]
+	public class ComponentDescriptorBase
+	{
+		public string typeName;
+		Type _type;
+		public Type type
+		{
+			get
+			{
+				if (string.IsNullOrEmpty(typeName)) return default(Type);
+				if (_type == null) _type = TypeUtility.GetTypeByName(typeName);
+				return _type;
+			}
+		}
+		public bool hasOnValidate;
 	}
 }

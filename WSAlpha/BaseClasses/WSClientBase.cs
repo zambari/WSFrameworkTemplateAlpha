@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using WebSocketSharp;
+using WSFrameworkConst;
 //zbr 2020
 
 // public abstract class WSClientBase : MonoBehaviour
@@ -100,13 +101,7 @@ public abstract class WSClientBase : MonoBehaviour
 	}
 	protected virtual void Reset()
 	{
-		string possiblename = this.GetType().ToString();
-		if (possiblename.StartsWith("WS"))
-			possiblename = possiblename.Substring(2);
-		//	if (possiblename.EndsWith("Client"))
-		//	possiblename = possiblename.Substring(0, possiblename.Length - "Client".Length);
-
-		serviceName = "/" + possiblename;
+		serviceName = this.GetPossibleServiceName(); 
 		if (_target == null) _target = GetComponentInParent<WSTargetAddress>();
 		if (_target == null) _target = GameObject.FindObjectOfType<WSTargetAddress>();
 		if (_target == null)
@@ -129,8 +124,12 @@ public abstract class WSClientBase : MonoBehaviour
 	}
 
 	protected void DebugClient(string s, GameObject g = null)
+	{//WSServer.frameCount +
+		Debug.Log("C "+ serviceName.MakeColor(Const.clientUsingServiceNameColor) + " " + s.MakeColor(Const.clientUsingServiceNameMssage).Small(), myGameObject);
+	}
+	protected void DebugClientNonColor(string s, GameObject g = null)
 	{
-		Debug.Log((WSServer.frameCount + (this.GetType().ToString() + " " + s).MakeColor(0, .6f, .9f)).Small(), myGameObject);
+		Debug.Log(WSServer.frameCount + serviceName, myGameObject);
 	}
 
 	public void SendString(string s)
@@ -200,6 +199,7 @@ public abstract class WSClientBase : MonoBehaviour
 	{
 		isConnected = true;
 		DebugClient("Client connected to " + websocketAddress);
+
 		if (measure != null) StopCoroutine(measure);
 
 		measure = StartCoroutine(statsSumary.DataRateMeasurement());
@@ -207,7 +207,7 @@ public abstract class WSClientBase : MonoBehaviour
 	protected virtual void OnDisconnected()
 	{
 		isConnected = false;
-		DebugClient("Client Disconnected");
+		DebugClientNonColor("Client Disconnected".MakeColor(Const.disconnectionMessage));
 		if (measure != null) StopCoroutine(measure);
 	}
 
@@ -232,12 +232,13 @@ public abstract class WSClientBase : MonoBehaviour
 	}
 	public virtual void Connect()
 	{
-		DebugClient("Connecting to " + websocketAddress);
+		//DebugClient("Connecting to " + websocketAddress);
 		ws = new WebSocketSharp.WebSocket(websocketAddress);
 		ws.OnOpen += OnOpenHandlerNonSynced;
 		ws.OnClose += OnCloseHandlerNonSynced;
 		ws.OnMessage += OnMessageHandlerNonSync;
 		connectWatchdog = StartCoroutine(ConnectionWachdog());
+
 	}
 
 	//    protected override void Update()
@@ -258,6 +259,7 @@ public abstract class WSClientBase : MonoBehaviour
 	{
 		conntectionEvents.Enqueue(true);
 		// DebugClient("client connected");
+		DebugClientNonColor("Client is connected ".MakeColor(Const.connectionMessage));
 	}
 
 	private void OnCloseHandlerNonSynced(object sender, CloseEventArgs e)

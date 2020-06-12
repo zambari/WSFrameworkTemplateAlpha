@@ -18,8 +18,10 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly //, IContextMenuBuilder
     public string idStringPartA;
     public string idStringPartB;
 
-    byte[] bytes = new byte[8];
     public static List<ulong> identifierList; //= new List<ulong>();
+
+    bool reverse = true;
+
     public static Dictionary<ulong, GameObject> objectDict = new Dictionary<ulong, GameObject>();
     void OnDestroy()
     {
@@ -43,70 +45,20 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly //, IContextMenuBuilder
                 }
                 toHash += thisTrans.GetSiblingIndex();
              */
-    public static byte[] GetFromString(string s)
-    {
 
-        using(MD5 md5 = MD5.Create())
-        {
-            md5.Initialize();
-            md5.ComputeHash(Encoding.UTF8.GetBytes(s));
-            return md5.Hash;
-        }
-    }
     static long counter;
     public void ValidateIdentifier()
     {
-
-        if (identifier == 0) identifier = CreateNewIdentifier(gameObject);
-        //    // int AttemptCount = 0;
-        ulong proposal = identifier;
-        if (RegisterID(proposal, this)) return;
-        string stringidea = name;
-        if (RegisterID(ObtainFromString(stringidea), this)) return;
-        if (RegisterID(ObtainFromString(stringidea), this)) return;
-        for (int i = 0; i < 5; i++)
+        if (!ObjectIDExtensions.CreateAndValidateIdentifier(this))
         {
-
-            if (RegisterID(ObtainIdentifierFromTime(), this)) return;
-        }
-        Debug.Log("Failed getting unieqe iod " + name, gameObject);
-        //  string nameoption= name;
-
-        // proposal=ObtainFromName(name+(transform.parent==null?"root":transform.parent.name));
-        // if (RegisterID(proposal, this)) return; }
-
-        //         identifier = ObtainIdentifier();
-
-    }
-    public ulong ObtainFromString(string s)
-    {
-        var bytes = GetFromString(s);
-        return BitConverter.ToUInt64(bytes, 0); //+ (ulong)Mathf.FloorToInt(10000 * Time.time);
-    }
-    public ulong ObtainIdentifierFromTime()
-    {
-
-        counter++;
-        return (ulong) System.DateTime.Now.Ticks << 16; //+ (ulong)(gameObject.GetInstanceID() + counter);
-        //int watchdog = 0;
-
-    }
-    System.Random random;
-
-    public ulong ObtainRandomme()
-    {
-        if (random == null)
-        {
-            Debug.Log("  rnd = null");
-            random = new System.Random();
-            if (random == null) Debug.Log("still rnd");
-            //return;
+            Debug.Log("failed getting new objectid " + name, gameObject);
         }
 
-        //         while (!sccess && watchdog < 50)
-        random.NextBytes(bytes);
-        return BitConverter.ToUInt64(bytes, 0);
-    } //+ (ulong)Mathf.FloorToInt(10000 * Time.time);
+     
+
+    }
+
+    //+ (ulong)Mathf.FloorToInt(10000 * Time.time);
     //             success = RegisterID(identifier, gameObject);
     // #if NOT
     //      
@@ -169,28 +121,13 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly //, IContextMenuBuilder
     // {
 
     // }
-    bool reverse = true;
     public void PrepareNiceStrings(ulong id)
     {
         var bytes = BitConverter.GetBytes(identifier);
-        idStringPartA = "";
-        idStringPartB = "";
-        if (reverse)
-        {
-            for (int i = bytes.Length - 1; i >= bytes.Length / 2; i--)
-                idStringPartA += "[" + bytes[i].ToString("X2") + "]";
-
-            for (int i = bytes.Length / 2 - 1; i >= 0; i--)
-                idStringPartB += "[" + bytes[i].ToString("X2") + "]";
-        }
-        else
-        {
-            for (int i = 0; i < bytes.Length / 2; i++)
-                idStringPartA += "[" + bytes[i].ToString("X2") + "]";
-            for (int i = bytes.Length / 2; i < bytes.Length; i++)
-                idStringPartB += "[" + bytes[i].ToString("X2") + "]";
-        }
+        idStringPartA = ObjectIDExtensions.ToStringAsHexA(bytes, reverse);
+        idStringPartB = ObjectIDExtensions.ToStringAsHexB(bytes, reverse);
     }
+
     void OnValidate()
     {
         //  if (Prefab)
@@ -214,15 +151,11 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly //, IContextMenuBuilder
 
     public static int Count { get { return objectDict.Count; } }
     // static bool zeroglaged; //todo: temporary
-    static bool RegisterID(ulong id, ObjectID objectID)
+    public static bool RegisterID(ulong id, ObjectID objectID)
     {
         if (id == 0)
         {
-            // if (!zeroglaged)
-            {
                 Debug.Log("zero id", objectID);
-                // zeroglaged = true;
-            }
             return false;
         }
 
@@ -249,10 +182,8 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly //, IContextMenuBuilder
     void ConfirmID(ulong id)
     {
         if (identifier != id)
-            // Debug.Log("confiremde id", gameObject);
             identifier = id;
         PrepareNiceStrings(id);
-
     }
     void OnEnable()
     {
@@ -267,10 +198,7 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly //, IContextMenuBuilder
         // rnd = new System.Random();
         //  ValidateId(rnd);
     }
-    public static ulong CreateNewIdentifier(GameObject g)
-    {
-        return (ulong) (System.DateTime.Now.Ticks << 24 ^ g.GetInstanceID());
-    }
+
     bool wasInit = false;
     void OnDisable()
     {
@@ -289,20 +217,7 @@ public class ObjectID : MonoBehaviour, IRequestInitEarly //, IContextMenuBuilder
         identifier = 0;
         ValidateIdentifier();
     }
-#if UNITY_EDITOR
-    [UnityEditor.MenuItem("Tools/AssignNewObjectIds")]
-    public static void AssignNewObjectID()
-    {
-        var allobjs = Resources.FindObjectsOfTypeAll(typeof(ObjectID)) as ObjectID[];
-        Debug.Log("found " + allobjs.Length);
-        foreach (var v in allobjs)
-        {
-            UnityEditor.Undo.RecordObject(v, "new id");
-            v.GetNewId();
-        }
-    }
 
-#endif
     static List<Material> copiedMaterials { get { if (_copiedMaterials == null) _copiedMaterials = new List<Material>(); return _copiedMaterials; } }
     static List<Material> _copiedMaterials;
     // public void BuildContextMenu(PrefabProvider prefabs, Transform target)

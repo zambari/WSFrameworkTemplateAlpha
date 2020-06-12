@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using WebSocketSharp;
 using WebSocketSharp.Server;
+using WSFrameworkConst;
 // v.01. twaks
 
 public abstract class WSServiceBase : MonoBehaviour
@@ -66,21 +67,12 @@ public abstract class WSServiceBase : MonoBehaviour
 		//	clientHanlders.Add(serviceBehaviour);
 		// DebugService("WSServiceBehaviour Open ");
 	}
-	protected string GetServiceName()
-	{
-		string possiblename = this.GetType().ToString();
-		if (possiblename.StartsWith("WS"))
-			possiblename = possiblename.Substring(2);
-		if (possiblename.EndsWith("Service"))
-			possiblename = possiblename.Substring(0, possiblename.Length - "Service".Length);
-		possiblename = possiblename.ToLower();
-		return "/" + possiblename;;
-	}
+
 	protected virtual void Reset()
 	{
 		GetServer();
 
-		serviceName = GetServiceName();
+		serviceName = this.GetPossibleServiceName(); 
 	}
 	void GetServer()
 	{
@@ -111,7 +103,7 @@ public abstract class WSServiceBase : MonoBehaviour
 
 	protected void DebugService(string s)
 	{
-		Debug.Log((this.GetType().ToString() + " " + s).MakeColor(new Color(.6f, .6f, .3f)), myGameObject);
+		Debug.Log("S "+serviceName.MakeColor(Const.serviceNameColor) + " " + s.MakeColor(Const.serviceMessageColor), myGameObject);
 	}
 
 	protected virtual void OnEnable()

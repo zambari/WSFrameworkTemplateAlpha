@@ -6,6 +6,68 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace Z.Reflection
 {
+
+	[System.Serializable]
+	public class MemberInstanceLink : MemberDescription
+	{
+		public ulong instanceReference;
+		MethodInfo methodInfo;
+		FieldInfo fieldInfo;
+		// 	Type _type;
+		// public Type type
+		// {
+		// 	get
+		// 	{
+		// 		if (string.IsNullOrEmpty(typeName)) return default(Type);
+		// 		if (_type == null) _type = TypeUtility.GetTypeByName(typeName);
+		// 		return _type;
+		// 	}
+		// }
+		public void SetFloat(object obj, float f)
+		{
+			switch (accessType)
+			{
+				case AccessType.fieldOnly:
+				Debug.Log("setfield");
+				if (fieldInfo==null)
+				{
+
+				}
+				break;
+				case AccessType.set:
+				case AccessType.get_set:
+				if (methodInfo==null)
+				{
+					methodInfo=obj.GetType().GetMethod(setName);
+					Debug.Log("createdmehtodinfo? "+(methodInfo!=null));
+				}
+				Component component= (obj as Component);
+				methodInfo.Invoke(component,new object[] { f });
+				Debug.Log("set on "+component.name,component);
+	
+				break;
+			default:
+			Debug.Log("unknown accestype "+accessType);
+			break;
+			}
+
+		}
+		public MemberInstanceLink(MemberDescription description, ulong id)
+		{
+			this.baseName = description.baseName;
+			setName = description.setName;
+			getName = description.getName;
+			fieldType = description.fieldType;
+			lastValue = description.lastValue;
+			lastStringValue = description.lastStringValue;
+			show = description.show;
+			hasField = description.hasField;
+			accessType=description.accessType;
+			valueRange = description.valueRange;
+			instanceReference = id;
+		}
+	}
+
 	[System.Serializable]
 	public class MemberDescription
 	{
@@ -13,18 +75,20 @@ namespace Z.Reflection
 		public string setName;
 		public string getName;
 		public FieldType fieldType;
-		public bool show;
+		public float lastValue;
+		public string lastStringValue;
+		public bool show = true;
 		//	public string backingFieldName;
 		public enum AccessType { notSet, ignore, fieldOnly, get_set, get, set }
 		// public enum AccessDirection { notSet, setOnly, getSet, autoUpdate }
-		public Vector2 valueRange;
 		[SerializeField] bool _hasGet;
 		[SerializeField] bool _hasSet;
 		public bool hasField;
-		public float lastValue;
-		public string lastStringValue;
+
 		public bool hasGet { get { return _hasGet; } set { _hasGet = value; } }
 		public bool hasSet { get { return _hasSet; } set { _hasSet = value; } }
+		public Vector2 valueRange;
+
 		public enum FieldType { Unknown, FloatField, IntField, BoolField, StringField, ClassField, TransformField, GameObjectField }
 		public AccessType accessType;
 		public void ReadValue(object o)

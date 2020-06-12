@@ -6,6 +6,7 @@ using UnityEngine.UI;
 //v.02 experimetnal isprefab
 //v.03 is selectedInEditor
 //v.04 getipaddress, 2017 compatibility
+//v.04a time desciptions
 
 public static class zBench
 {
@@ -75,9 +76,9 @@ public static class zBench
         if (Application.isPlaying)
         {
             string strHostName = System.Net.Dns.GetHostName();
-            #pragma warning disable 618
+#pragma warning disable 618
             System.Net.IPHostEntry iphostentry = System.Net.Dns.GetHostByName(strHostName);
-            #pragma warning restore 618
+#pragma warning restore 618
             foreach (System.Net.IPAddress ipaddress in iphostentry.AddressList)
                 if (ipaddress.GetAddressBytes().Length == 4)
 
@@ -85,6 +86,11 @@ public static class zBench
         }
         return "x.x.x.x";
     }
+    /// <summary>
+    /// Starts A System Diagnostics instance and adds it to a dictionary
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
     public static System.Diagnostics.Stopwatch Start(string key)
     {
         var sw = GetStopWatch(key);
@@ -112,15 +118,58 @@ public static class zBench
         sw.Start();
         return (int) sw.ElapsedMilliseconds;
     }
-    public static int End(string key)
+    /// <summary>
+    /// Ends the stopwatch and returns the number of millis it took. optionally prints debug
+    /// </summary>
+    public static long End(string key)
+    {
+        return EndMillis(key, true);
+    }
+
+    public static int EndMillis(string key, bool print = false)
     {
         var sw = GetStopWatch(key);
         sw.Stop();
-        if (sw.ElapsedMilliseconds < 5)
-            Debug.Log("Time between starting and finih of [" + key + "] was  " + sw.ElapsedMilliseconds + " ms (or " + sw.ElapsedTicks + " ticks)");
-        else
-            Debug.Log("Time between starting and finih of [" + key + "] was  " + sw.ElapsedMilliseconds + " ms (or " + sw.ElapsedTicks + " ticks)");
+        if (print)
+        {
+            if (sw.ElapsedMilliseconds < 5)
+                Debug.Log("Time between starting and finih of [" + key + "] was  " + sw.ElapsedMilliseconds + " ms (or " + sw.ElapsedTicks + " ticks)");
+            else
+                Debug.Log("Time between starting and finih of [" + key + "] was  " + sw.ElapsedMilliseconds + " ms (or " + sw.ElapsedTicks + " ticks)");
+        }
         stopwatchdict.Remove(key);
         return (int) sw.ElapsedMilliseconds;
+    }
+    public static int EndMillis(string key, string message)
+    {
+        var sw = GetStopWatch(key);
+        sw.Stop();
+        Debug.Log(("["+key+"] : " + sw.ElapsedMilliseconds + " ms  ").Small() + message);
+        stopwatchdict.Remove(key);
+        return (int) sw.ElapsedMilliseconds;
+    }
+
+    /// <summary>
+    /// Stops the stopwatch 
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+
+    /// <summary>
+    /// Ends the stopwatch and returns the number of ticks it took. optionally prints debug
+    /// </summary>
+    public static long EndTicks(string key, bool print = false)
+    {
+        var sw = GetStopWatch(key);
+        sw.Stop();
+        if (print)
+        {
+            if (sw.ElapsedMilliseconds < 5)
+                Debug.Log("Time between starting and finih of [" + key + "] was  " + sw.ElapsedMilliseconds + " ms (or " + sw.ElapsedTicks + " ticks)");
+            else
+                Debug.Log("Time between starting and finih of [" + key + "] was  " + sw.ElapsedMilliseconds + " ms (or " + sw.ElapsedTicks + " ticks)");
+        }
+        stopwatchdict.Remove(key);
+        return sw.ElapsedTicks;
     }
 }

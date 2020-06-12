@@ -17,7 +17,7 @@ public class WSHierarchyClient : WSOSCClient
 			if (message.typeTag[1] == 's')
 			{
 				string payload = message.GetString(0);
-				Debug.Log("decoding roots "+payload);
+				Debug.Log("decoding roots " + payload);
 
 				var response = JsonUtility.FromJson<WSHierarchyResponse>(payload);
 				if (response != null)
@@ -39,9 +39,16 @@ public class WSHierarchyClient : WSOSCClient
 			DebugClient("unknown address " + message.Address);
 		}
 	}
+
+	protected override void OnConnected()
+	{
+		base.OnConnected();
+		SendRequest();
+	}
+
 	void UpdateNodes(WSHierarchyResponse repsonse)
 	{
-		var filler=GetComponent<HierachyFiller>();
+		var filler = GetComponent<HierachyFiller>();
 		filler.UpdateNodes(repsonse);
 		// Debug.Log("updating nodes");
 	}

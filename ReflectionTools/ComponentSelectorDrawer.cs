@@ -80,6 +80,6 @@ namespace Z.Reflection
 		}
 
 	}
+#endif
 
 }
-#endif

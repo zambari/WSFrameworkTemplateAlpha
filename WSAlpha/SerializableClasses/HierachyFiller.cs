@@ -7,6 +7,7 @@ public class HierachyFiller : ScrolPooledControllerBase
 {
 	List<TransformNodeInfo> nodes;
 	WSHierarchyResponse repsonse;
+	public WSObjectReferencingClient itemSelectionReciever;
 	public void UpdateNodes(WSHierarchyResponse repsonse)
 	{
 		this.repsonse = repsonse;
@@ -21,9 +22,18 @@ public class HierachyFiller : ScrolPooledControllerBase
 
 	public override void OnFillItem(int index, GameObject go)
 	{
+		TransformNodeInfo node = repsonse.nodes[index];
 		var item = go.GetComponent<ListItem>();
-		item.label = repsonse.nodes[index].name + " hide " + repsonse.nodes[index].hideFlags;
-		Debug.Log("filling " + item.label);
+		var b = item.GetComponentInChildren<Button>();
+		item.ClearListeners();
+		if (itemSelectionReciever != null)
+			item.SetCallback(() =>
+			{
+				itemSelectionReciever.OnNodeClicked(node);
+			});
+		//	DestroyImmediate(b);
+		item.label = node.name + " / " + (node.objectId == 0 ? "" : node.objectId.ToStringAsHex());
+		// 	Debug.Log("filling " + item.label);
 	}
 
 }
