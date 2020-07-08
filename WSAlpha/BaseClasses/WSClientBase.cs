@@ -4,297 +4,283 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using WebSocketSharp;
+using WSFrameworkConst;
 //zbr 2020
-
-// public abstract class WSClientBase : MonoBehaviour
-// {
-// //   public CommStats statsSumary = new CommStats();
-//     public string serviceName = "/test";
-
-//    public CommStats statsSumary = new CommStats(); //temporary
-// 	protected abstract void OnMessageDequeue(WebSocketSharp.MessageEventArgs s);
-// 	protected Queue<MessageEventArgs> messageQueue = new Queue<MessageEventArgs>();
-
-// 	Coroutine aligner;
-// 	protected virtual void OnEnable()
-// 	{
-// 		aligner = StartCoroutine(Aligner());
-// 	}
-
-// 	[HideInInspector]
-// 	protected bool timeSpreadQueueItems;
-// 	IEnumerator Aligner()
-// 	{
-// 		while (true)
-// 		{
-// 			while (messageQueue.Count > 0)
-// 			{
-// 				OnMessageDequeue(messageQueue.Dequeue());
-// 				if (timeSpreadQueueItems)
-// 				{
-// 					yield return null;
-// 					yield return null;
-// 				}
-// 			}
-// 			yield return null;
-// 		}
-// 	}
-
-// 	protected void OnMessageHandlerNonSync(object sender, MessageEventArgs e)
-// 	{
-// 		statsSumary.AddBytesRecieved(e.Data.Length);
-// 		messageQueue.Enqueue(e);
-// 	}
-// 	protected virtual void OnDisable()
-// 	{
-// 		StopCoroutine(aligner);
-// 	}
-// 	protected virtual void Update()
-// 	{
-// 		while (messageQueue.Count > 0)
-// 			OnMessageDequeue(messageQueue.Dequeue());
-// 	}
-
-// }
 
 public abstract class WSClientBase : MonoBehaviour
 {
-	public CommStats statsSumary = new CommStats(); //temporary
-	protected Queue<MessageEventArgs> messageQueue = new Queue<MessageEventArgs>();
-	[ReadOnly]
-	public bool isConnected = false;
-	public string serviceName = "/test";
-	protected abstract void OnMessageDequeue(MessageEventArgs message);
+    [Space(10)]
+    [ReadOnly]
+    public bool isConnected = false;
+    protected bool IsConnected { get { return ws != null && ws.IsConnected; } }
 
-	protected Queue<bool> conntectionEvents = new Queue<bool>();
+    public CommStats statsSumary = new CommStats(); //temporary
+    protected Queue<MessageEventArgs> messageQueue = new Queue<MessageEventArgs>();
+    public string serviceName = "/test";
+    protected Queue<bool> conntectionEvents = new Queue<bool>();
+    protected WebSocketSharp.WebSocket ws;
+    [SerializeField]
+    protected int waitBetweenReconnectAttempts = 8;
+    Coroutine connectWatchdog;
+    protected abstract void OnMessageDequeue(MessageEventArgs message);
+    Coroutine measure;
+    GameObject myGameObject;
+    protected WSTargetAddress target
+    {
+        get
+        {
+            if (_target == null) _target = GetComponentInParent<WSTargetAddress>();
+            if (_target == null) _target = GameObject.FindObjectOfType<WSTargetAddress>();
+            return _target;
+        }
+    }
 
-	protected WebSocketSharp.WebSocket ws;
-	public bool autoConnect = true;
+    float nextStatsUpdate;
+    float lastSnapthot;
+    int measureinterval = 3;
 
-	[SerializeField]
-	protected int waitBetweenReconnectAttempts = 8;
+    [SerializeField] WSTargetAddress _target;
+    protected string GetServiceName()
+    {
+        string possiblename = this.GetType().ToString().ToLower();
+        if (possiblename.StartsWith("ws"))
+            possiblename = possiblename.Substring(2);
+        if (possiblename.EndsWith("service"))
+            possiblename = possiblename.Substring(0, possiblename.Length - "Service".Length);
+        if (possiblename.EndsWith("client"))
+            possiblename = possiblename.Substring(0, possiblename.Length - "client".Length);
+        possiblename = possiblename.ToLower();
+        return "/" + possiblename; ;
+    }
+    protected virtual void Reset()
+    {
+        serviceName = this.GetPossibleServiceName();
+        if (target == null)
+        {
+            var go = new GameObject("WebsocketClientHelper");
+            _target = go.AddComponent<WSTargetAddress>();
+        }
 
-	Coroutine connectWatchdog;
-	protected WSTargetAddress target
-	{
-		get
-		{
-			if (_target == null) _target = GetComponentInParent<WSTargetAddress>();
-			if (_target == null) _target = GameObject.FindObjectOfType<WSTargetAddress>();
-			return _target;
-		}
-	}
+    }
+    public string websocketAddress
+    {
+        get
+        {
+            if (target == null)
+            {
+                DebugClient("Target Address for websocket client not found, please add WSTargetAddress component");
+                return "unknown";
+            }
+            return "ws://" + target.ipAddress + ":" + target.port + serviceName;
+        }
+    }
 
-	[SerializeField] WSTargetAddress _target;
-	Coroutine measure;
-	GameObject myGameObject;
-	protected bool IsConnected { get { return ws != null && ws.IsConnected; } }
-	protected virtual void Reset()
-	{
-		string possiblename = this.GetType().ToString();
-		if (possiblename.StartsWith("WS"))
-			possiblename = possiblename.Substring(2);
-	//	if (possiblename.EndsWith("Client"))
-		//	possiblename = possiblename.Substring(0, possiblename.Length - "Client".Length);
+    protected void DebugClient(string s, GameObject g = null)
+    { //WSServer.frameCount +
+        Debug.Log("c " + serviceName.MakeColor(Const.clientUsingServiceNameColor).Small() + " " + s.MakeColor(Const.clientUsingServiceNameMssage).Small(), myGameObject);
+    }
+    protected void DebugClientNonColor(string s, GameObject g = null)
+    {
+        //	Debug.Log(WSServer.frameCount + serviceName, myGameObject);
+    }
 
-		serviceName = "/" + possiblename;
-		if (_target == null) _target = GetComponentInParent<WSTargetAddress>();
-		if (_target == null) _target = GameObject.FindObjectOfType<WSTargetAddress>();
-		if (_target == null)
-		{
-			var go = new GameObject("WebsocketClientHelper");
-			_target = go.AddComponent<WSTargetAddress>();
-		}
+    // public void SendString(string s)
+    // {
+    // 	statsSumary.AddBytesSent(s.Length);
+    // 	if (ws != null && ws.IsConnected)
+    // 		ws.SendString(s);
+    // 	else
+    // 	{
+    // 		DebugClient("not connected");
+    // 	}
+    // }
+    protected void SendBytes(byte[] bytes)
+    {
+        if (ws != null && ws.IsConnected)
+        {
+            ws.SendAsync(bytes, null);
+            statsSumary.AddBytesSent(bytes.Length);
+        }
+        else
+        {
+            DebugClient("not connected");
+        }
+    }
 
-	}
-	public string websocketAddress
-	{
-		get
-		{
-			if (target == null)
-			{
-				DebugClient("Target Address for websocket client not found, please add WSTargetAddress component");
-			}
-			return "ws://" + target.ipAddress + ":" + target.port + serviceName;
-		}
-	}
+    protected IEnumerator ConnectionWachdog()
+    {
+        int attempt = 0;
+        while (true)
+        {
+            isConnected = ws.IsConnected;
+            if (!ws.IsConnected)
+            {
+                ws.ConnectAsync();
+                attempt++;
+                if (attempt > 1)
+                    DebugClient("connection attempt " + attempt);
+            }
+            yield return new WaitForSeconds(waitBetweenReconnectAttempts);
+        }
+    }
+    public void StopConnect()
+    {
+        if (connectWatchdog != null) StopCoroutine(connectWatchdog);
+    }
+    void OnConnectedBase()
+    {
+        isConnected = true;
+        if (statsSumary.printOnRecieve)
+         DebugClient("Client connected to " + websocketAddress);
 
-	protected void DebugClient(string s, GameObject g = null)
-	{
-		Debug.Log((WSServer.frameCount + (this.GetType().ToString() + " " + s).MakeColor(0, .6f, .9f)).Small(), myGameObject);
-	}
+        if (measure != null) StopCoroutine(measure);
+        measure = StartCoroutine(statsSumary.DataRateMeasurement());
+        OnConnected();
+    }
+    protected virtual void OnConnected()
+    {
 
-	public void Send(string s)
-	{
-		statsSumary.AddBytesSent(s.Length);
-		if (ws != null && ws.IsConnected)
-			ws.SendString(s);
-		else
-		{
-			DebugClient("not connected");
-		}
-	}
-	public void Send(byte[] bytes)
-	{
-		if (ws != null && ws.IsConnected)
-		{
-			ws.SendAsync(bytes, null);
-			statsSumary.AddBytesSent(bytes.Length);
-		}
-		else
-		{
-			DebugClient("not connected");
-		}
+    }
+    void OnDisconnectedBase()
+    {
+        isConnected = false;
+        if (statsSumary.printOnRecieve)
+        DebugClientNonColor("Client Disconnected".MakeColor(Const.disconnectionMessage));
+        if (measure != null) StopCoroutine(measure);
+        OnDisconnected();
+    }
+    protected virtual void OnDisconnected()
+    {
 
-	}
-	public void SendAsync(byte[] bytes)
-	{
-		if (ws != null && ws.IsConnected)
-		{
+    }
 
-			ws.SendAsync(bytes, null);
-			statsSumary.AddBytesSent(bytes.Length);
-		}
-		else
-		{
-			DebugClient("not connected");
-		}
-	}
+    //     IEnumerator DataRateMeasurement()
+    // {
+    //     while (true)
+    //     {
+    //         startTime = Time.time;
+    //         statsSumary.bytesPerSecond = statsSumary.bytesSinceTick / 3;
+    //         statsSumary.bytesSinceTick = 0;
 
-	// protected void DebugClient(string s, GameObject g = null)
-	// {
-	// 	//  Debug.Log("<color=" + ColorUtility.ToHtmlStringRGB(new Color(0.3f, 0.7f, 0.1f)) + ">" + s + "</color>", gameObject);
-	// 	Debug.Log(s.MakeGreen());
-	// }
+    //         statsSumary.rxBytesPerSecond = statsSumary.rxBytesSinceTick / 3;
+    //         statsSumary.rxBytesSinceTick = 0;
 
-	protected IEnumerator ConnectionWachdog()
-	{
-		int attempt = 0;
-		while (true)
-		{
-			isConnected = ws.IsConnected;
-			if (!ws.IsConnected)
-			{
-				ws.ConnectAsync();
-				attempt++;
-				if (attempt > 1)
-					DebugClient("connection attempt " + attempt);
-			}
-			yield return new WaitForSeconds(waitBetweenReconnectAttempts);
-		}
-	}
-	public void StopConnect()
-	{
-		if (connectWatchdog != null) StopCoroutine(connectWatchdog);
-	}
-	protected virtual void OnConnected()
-	{
-		isConnected = true;
-		DebugClient("Client connected to " + websocketAddress);
-		if (measure != null) StopCoroutine(measure);
+    //         yield return new WaitForSeconds(3);
+    //     }
+    // }
+    protected void OnMessageHandlerNonSync(object sender, MessageEventArgs e)
+    {
+        statsSumary.AddBytesRecieved(e.Data.Length);
+        messageQueue.Enqueue(e);
+    }
+    public virtual void Connect()
+    {
 
-		measure = StartCoroutine(statsSumary.DataRateMeasurement());
-	}
-	protected virtual void OnDisconnected()
-	{
-		isConnected = false;
-		DebugClient("Client Disconnected");
-		if (measure != null) StopCoroutine(measure);
-	}
+        ws = new WebSocketSharp.WebSocket(websocketAddress);
+        ws.OnOpen += OnOpenHandlerNonSynced;
+        ws.OnClose += OnCloseHandlerNonSynced;
+        ws.OnMessage += OnMessageHandlerNonSync;
+        ws.Connect();
+        if (statsSumary.printOnSend)
+        DebugClient("Connecting to " + websocketAddress + " " + ws.IsConnected);
 
-	//     IEnumerator DataRateMeasurement()
-	// {
-	//     while (true)
-	//     {
-	//         startTime = Time.time;
-	//         statsSumary.bytesPerSecond = statsSumary.bytesSinceTick / 3;
-	//         statsSumary.bytesSinceTick = 0;
+    }
+    public virtual void Disconnect()
+    {
 
-	//         statsSumary.rxBytesPerSecond = statsSumary.rxBytesSinceTick / 3;
-	//         statsSumary.rxBytesSinceTick = 0;
+        if (ws!=null)
+if (statsSumary.printOnSend)
+        DebugClient("Disconnect request to " + websocketAddress + " " + ws.IsConnected);
+        //ws.closeAsync(0, "requested closing");
+        // ws = null;
+        ws.Close();
+        ws = null;
+        // ws = new WebSocketSharp.WebSocket(websocketAddress);
+        // ws.OnOpen += OnOpenHandlerNonSynced;
+        // ws.OnClose += OnCloseHandlerNonSynced;
+        // ws.OnMessage += OnMessageHandlerNonSync;
+        // ws.Connect();
 
-	//         yield return new WaitForSeconds(3);
-	//     }
-	// }
-	protected void OnMessageHandlerNonSync(object sender, MessageEventArgs e)
-	{
-		statsSumary.AddBytesRecieved(e.Data.Length);
-		messageQueue.Enqueue(e);
-	}
-	public virtual void Connect()
-	{
-		DebugClient("Connecting to " + websocketAddress);
-		ws = new WebSocketSharp.WebSocket(websocketAddress);
-		ws.OnOpen += OnOpenHandlerNonSynced;
-		ws.OnClose += OnCloseHandlerNonSynced;
-		ws.OnMessage += OnMessageHandlerNonSync;
-		connectWatchdog = StartCoroutine(ConnectionWachdog());
-	}
+    }
+    //    protected override void Update()
+    // {
+    //     base.Update();
+    //     if (autoReuest)
+    //     {
+    //         requestcounter++;
+    //         if (requestcounter > requestinterval)
+    //         {
+    //             requestcounter = 0;
+    //             RequestFrame();
+    //         }
+    //     }
+    // }
 
-	//    protected override void Update()
-	// {
-	//     base.Update();
-	//     if (autoReuest)
-	//     {
-	//         requestcounter++;
-	//         if (requestcounter > requestinterval)
-	//         {
-	//             requestcounter = 0;
-	//             RequestFrame();
-	//         }
-	//     }
-	// }
+    private void OnOpenHandlerNonSynced(object sender, System.EventArgs e)
+    {
+        conntectionEvents.Enqueue(true);
+        // DebugClient("client connected");
+        //		DebugClientNonColor("Client is connected ".MakeColor(Const.connectionMessage));
+    }
 
-	private void OnOpenHandlerNonSynced(object sender, System.EventArgs e)
-	{
-		conntectionEvents.Enqueue(true);
+    private void OnCloseHandlerNonSynced(object sender, CloseEventArgs e)
+    {
+        conntectionEvents.Enqueue(false);
+        DebugClientNonColor(("client:WebSocket closed with reason: " + e.Reason).MakeRed());
+    }
 
-		DebugClient("client connected");
-	}
+    protected virtual void  Start()
+    {
+        myGameObject = gameObject;
+        if (target != null)
+        {
+            target.OnConnectRequested += Connect;
+            target.OnDisconnectRequested += Disconnect;
+        }
+        //	yield return null;
+        //	yield return null;
+        // #if UNITY_EDITOR
+        if (target.clientsShouldAutoConnect && Time.time > 1)
+        {
+            Connect();
+            //	connectWatchdog = StartCoroutine(ConnectionWachdog());
+        }
+        // #endif
+    }
+    void OnDestroy()
+    {
+        if (ws != null)
+            ws.Close();
+    }
 
-	private void OnCloseHandlerNonSynced(object sender, CloseEventArgs e)
-	{
-		conntectionEvents.Enqueue(false);
-		DebugClient("client:WebSocket closed with reason: " + e.Reason);
-	}
+    protected virtual void Update()
+    {
+        lock (messageQueue)
+        {
+            while (messageQueue.Count > 0)
+            {
 
-	protected virtual IEnumerator Start()
-	{
-		myGameObject = gameObject;
-		yield return null;
-		// #if UNITY_EDITOR
-		if (autoConnect)
-		{
-			Connect();
-		}
-		// #endif
-	}
-	float nextStatsUpdate;
-	float lastSnapthot;
-	int measureinterval = 3;
-	protected virtual void Update()
-	{
-		while (messageQueue.Count > 0)
-		{
-			OnMessageDequeue(messageQueue.Dequeue());
-		}
+                OnMessageDequeue(messageQueue.Dequeue());
+            }
+        }
+        lock (conntectionEvents)
+        {
+            while (conntectionEvents.Count > 0)
+            {
+                var thisEvent = conntectionEvents.Dequeue();
+                if (thisEvent)
+                    OnConnectedBase();
+                else
+                    OnDisconnectedBase();
+            }
+        }
+        if (Time.time > nextStatsUpdate)
+        {
+            nextStatsUpdate = Time.time + measureinterval;
+            // Debug.Log("mesring "+txBytesTotal );
+            statsSumary.UpdateAverages(Time.time - lastSnapthot);
+            lastSnapthot = Time.time;
+        }
 
-		while (conntectionEvents.Count > 0)
-		{
-			var thisEvent = conntectionEvents.Dequeue();
-			if (thisEvent)
-				OnConnected();
-			else
-				OnDisconnected();
-
-		}
-		if (Time.time > nextStatsUpdate)
-		{
-			nextStatsUpdate = Time.time + measureinterval;
-			// Debug.Log("mesring "+txBytesTotal );
-			statsSumary.UpdateAverages(Time.time - lastSnapthot);
-			lastSnapthot = Time.time;
-		}
-
-	}
+    }
 }

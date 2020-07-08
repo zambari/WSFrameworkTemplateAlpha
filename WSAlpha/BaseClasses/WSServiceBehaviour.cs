@@ -17,13 +17,13 @@ public class WSServiceBehaviour : WebSocketBehavior
 		{
 			messageQueue.Enqueue(e);
 		}
-	//	if (stats != null) 
+		//	if (stats != null) 
 		stats.AddBytesRecieved(e.RawData.Length);
 	}
 	public override void SendBytes(byte[] data)
 	{
 		base.SendBytes(data);
-	//	if (stats != null) 
+		//	if (stats != null) 
 		stats.AddBytesSent(data.Length);
 
 	}
@@ -31,19 +31,28 @@ public class WSServiceBehaviour : WebSocketBehavior
 	public override void SendString(string data)
 	{
 		base.SendString(data);
-	//	if (stats != null) 
+		//	if (stats != null) 
 		stats.AddBytesSent(data.Length);
 	}
 	protected override void OnClose(CloseEventArgs e)
 	{
-		closedQueue.Enqueue(e);
+		lock(closedQueue)
+		{
+			closedQueue.Enqueue(e);
+		}
 	}
 	protected override void OnError(ErrorEventArgs e)
 	{
-		errorQueue.Enqueue(e);
+		lock(closedQueue)
+		{
+			errorQueue.Enqueue(e);
+		}
 	}
 	protected override void OnOpen()
 	{
-		closedQueue.Enqueue(null);
+		lock(closedQueue)
+		{
+			closedQueue.Enqueue(null);
+		}
 	}
 }

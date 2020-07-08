@@ -9,7 +9,6 @@ public class zOSCLoggable
 	public class LogInfo
 	{
 		public bool writeToConsole = true;
-
 		public string name = "unnamed";
 		public Color color = Color.green * .7f;
 
@@ -21,7 +20,7 @@ public class zOSCLoggable
 	{
 		if (string.IsNullOrEmpty(s)) return;
 		if (!loggingInfo.writeToConsole) return;
-		Debug.Log((loggingInfo.name + ":" + s).MakeColor(loggingInfo.color));
+		// Debug.Log((loggingInfo.name + ":" + s).MakeColor(loggingInfo.color));
 	}
 	public void Log(string s, Component component)
 	{

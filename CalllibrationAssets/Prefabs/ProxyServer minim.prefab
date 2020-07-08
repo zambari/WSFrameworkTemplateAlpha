@@ -1,0 +1,430 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &282614496677561583
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 282614496677561568}
+  - component: {fileID: 660251722210215383}
+  - component: {fileID: 7806768224068761601}
+  - component: {fileID: 4881954364330318107}
+  - component: {fileID: 3869283730028642948}
+  - component: {fileID: 5082156033904728722}
+  - component: {fileID: 1002252235106272936}
+  - component: {fileID: 655782552853598591}
+  - component: {fileID: 1910221340095352986}
+  - component: {fileID: 6291291166253986448}
+  m_Layer: 5
+  m_Name: ProxyServer minim
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &282614496677561568
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282614496677561583}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 291, y: 457.5}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &660251722210215383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282614496677561583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85dd29609697d814e95891e812863282, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  multiConfig:
+    targetAddresses:
+    - url: ws://127.0.0.1:4640
+      enable: 1
+      muteSends: 0
+      muteRecieves: 0
+      pickForRecieving: 0
+    - url: ws://127.0.0.1:4641
+      enable: 1
+      muteSends: 0
+      muteRecieves: 0
+      pickForRecieving: 0
+    - url: ws://127.0.0.1:4642
+      enable: 1
+      muteSends: 0
+      muteRecieves: 0
+      pickForRecieving: 0
+--- !u!114 &7806768224068761601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282614496677561583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fddbaa82aeb50d747bffa333bb92d428, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  port: 4600
+  statsSumary:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  OnAnyServiceConnected:
+    m_PersistentCalls:
+      m_Calls: []
+  activeServiesCount: 0
+  services: []
+  config:
+    targetAddresses:
+    - url: ws://127.0.0.1:4649
+      enable: 1
+      muteSends: 0
+      muteRecieves: 0
+      pickForRecieving: 0
+--- !u!114 &4881954364330318107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282614496677561583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85dd29609697d814e95891e812863282, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  multiConfig:
+    targetAddresses:
+    - url: ws://127.0.0.1:4640
+      enable: 1
+      muteSends: 0
+      muteRecieves: 0
+      pickForRecieving: 0
+    - url: ws://127.0.0.1:4641
+      enable: 1
+      muteSends: 0
+      muteRecieves: 0
+      pickForRecieving: 0
+    - url: ws://127.0.0.1:4642
+      enable: 1
+      muteSends: 0
+      muteRecieves: 0
+      pickForRecieving: 0
+--- !u!114 &3869283730028642948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282614496677561583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 705dceb686417cb4f86b92f5af20a9b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _server: {fileID: 7806768224068761601}
+  connectedClients: 0
+  _serviceName: /component
+  stats:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  autoStart: 1
+  statsSumary:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  connected: 
+  rxCount: 
+  txCount: 
+  pickeda: -1
+  pickedb: -1
+  statsObject: {fileID: 0}
+--- !u!114 &5082156033904728722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282614496677561583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 705dceb686417cb4f86b92f5af20a9b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _server: {fileID: 7806768224068761601}
+  connectedClients: 0
+  _serviceName: /console
+  stats:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  autoStart: 1
+  statsSumary:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  connected: 
+  rxCount: 
+  txCount: 
+  pickeda: -1
+  pickedb: -1
+  statsObject: {fileID: 0}
+--- !u!114 &1002252235106272936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282614496677561583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 705dceb686417cb4f86b92f5af20a9b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _server: {fileID: 7806768224068761601}
+  connectedClients: 0
+  _serviceName: /hierarchy
+  stats:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  autoStart: 1
+  statsSumary:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  connected: 
+  rxCount: 
+  txCount: 
+  pickeda: -1
+  pickedb: -1
+  statsObject: {fileID: 0}
+--- !u!114 &655782552853598591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282614496677561583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 705dceb686417cb4f86b92f5af20a9b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _server: {fileID: 7806768224068761601}
+  connectedClients: 0
+  _serviceName: /ping
+  stats:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  autoStart: 1
+  statsSumary:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  connected: 
+  rxCount: 
+  txCount: 
+  pickeda: -1
+  pickedb: -1
+  statsObject: {fileID: 0}
+--- !u!114 &1910221340095352986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282614496677561583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 705dceb686417cb4f86b92f5af20a9b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _server: {fileID: 7806768224068761601}
+  connectedClients: 0
+  _serviceName: /transform
+  stats:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  autoStart: 1
+  statsSumary:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  connected: 
+  rxCount: 
+  txCount: 
+  pickeda: -1
+  pickedb: -1
+  statsObject: {fileID: 0}
+--- !u!114 &6291291166253986448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282614496677561583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 705dceb686417cb4f86b92f5af20a9b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _server: {fileID: 7806768224068761601}
+  connectedClients: 0
+  _serviceName: /value
+  stats:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  autoStart: 1
+  statsSumary:
+    txBytesTotal: 0
+    txFrames: 0
+    rxFrames: 0
+    rxBytesTotal: 0
+    rxBytesSinceTick: 0
+    txBytesSinceTick: 0
+    txBytesPerSecond: 0
+    rxBytesPerSecond: 0
+    rxMessagesPerSecondAverage: 0
+    rxMessagesPerSecondTick: 0
+    printOnRecieve: 0
+    printOnSend: 0
+  connected: 
+  rxCount: 
+  txCount: 
+  pickeda: -1
+  pickedb: -1
+  statsObject: {fileID: 0}

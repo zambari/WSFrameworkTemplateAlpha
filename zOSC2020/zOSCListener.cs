@@ -10,6 +10,7 @@ public class zOSCListener : MonoBehaviour, IRecieveOSC
 	public string listenportfunny;
 	public int listenportdecoded;
 	protected List<IConsumeOSC> consumers = new List<IConsumeOSC>();
+	public bool printOnRecieve { get { return oscListener.stats.printOnRecieve; } set { oscListener.stats.printOnRecieve = value; } }
 	public void Register(IConsumeOSC consumer)
 	{
 		consumers.Add(consumer);
@@ -20,7 +21,7 @@ public class zOSCListener : MonoBehaviour, IRecieveOSC
 		listenportdecoded = 0;
 		for (int i = 0; i < listenportfunny.Length; i++)
 		{
-			listenportdecoded = listenportdecoded <<1;
+			listenportdecoded = listenportdecoded << 1;
 			listenportdecoded += (int) listenportfunny[i];
 		}
 		// listenportfunny = zOSCNameAlpha.PortToName(oscListener.listenPort);
@@ -30,26 +31,51 @@ public class zOSCListener : MonoBehaviour, IRecieveOSC
 	{
 		foreach (var oscConsumer in consumers)
 			oscConsumer.OnMessage(message);
-		Debug.Log(name + " reciever got packet " + message.Address + " type " + message.typeTag + " (consumer count " + consumers.Count + ")");
+		if (oscListener.stats.printOnRecieve)
+		{
+			if (useFilter && message.Address.Contains(filterString))
+			{
+
+			}
+			else
+			{
+				Debug.Log("OSC in: " + message.ToReadableString()); //+ " (consumer count " + consumers.Count + ")"
+			}
+		}
 	}
 	public void Unregister(IConsumeOSC consumer)
 	{
 		consumers.Remove(consumer);
 	}
+	public void Reopen()
+	{
+		if (oscListener.RestartLocalServer())
+		{
+			Debug.Log("Osc lisener started at " + oscListener.listenPort);
+		}
+	}
+	public void SetPort(string portAsString)
+	{
+		int port;
+		if (System.Int32.TryParse(portAsString, out port))
+		{
+			oscListener.listenPort = port;
+			Debug.Log("set listen port");
+		}
+	}
 	protected virtual void Start()
 	{
 		if (oscListener.autoStart)
 		{
-			if (oscListener.RestartLocalServer())
-			{
-				Debug.Log("additional osc lisener started at " + oscListener.listenPort);
-			}
+			Reopen();
 		}
 		oscListener.useCustomReciever = true;
 		oscListener.onPacket -= BroadcastPacketToConsumers;
 		oscListener.onPacket += BroadcastPacketToConsumers;
 	}
-
+	public string filterString = "position";
+	bool _useFilter = true;
+	public bool useFilter { get { return _useFilter; } set { _useFilter = value; } }
 	// protected virtual void OnValidate()
 	// {
 	// 	if (name == "GameObject") name = "zOSCAdditionalListener";

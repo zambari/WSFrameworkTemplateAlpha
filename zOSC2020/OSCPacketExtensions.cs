@@ -12,6 +12,7 @@ using Z;
 // extensions of UnityOSC's packet class by zambari/stereoko.tv 2017
 // v.0.1
 // V.0.2 postmerge
+// v.0.3 getlong
 public static class OSCPacketExtensions
 {
 
@@ -54,7 +55,25 @@ public static class OSCPacketExtensions
         return Convert.ToSingle(packet.Data[index]);
 
     }
+     public static System.Int64 GetLong(this OSCPacket packet, int index)
+    {
+        packet.AssertTypeTag(index, 'h');
+        return Convert.ToInt64(packet.Data[index]);
+    }
+    
+     public static System.UInt64 GetULong(this OSCPacket packet, int index)
+    {
+        packet.AssertTypeTag(index, 'u');
+        return Convert.ToUInt64(packet.Data[index]);
+    }
     public static string GetString(this OSCPacket packet, int index = 0)
+    {
+        packet.AssertTypeTag(index, 's');
+        return packet.Data[index].ToString(); //System.Convert.ToString(packet.Data[index]);
+
+    }
+
+    public static string GetBool(this OSCPacket packet, int index = 0)
     {
         packet.AssertTypeTag(index, 's');
         return packet.Data[index].ToString(); //System.Convert.ToString(packet.Data[index]);

@@ -4,43 +4,55 @@ using UnityEngine;
 using UnityEngine.UI;
 using WebSocketSharp;
 
-public class WSPingService : WSServiceBase
+public class WSPingService : WSOSCService
 {
-
-	// Use this for initialization
-
-	// [SerializeField]
-	// protected string _serviceName;
-	// public override string serviceName { get { return _serviceName; } } // "/ping";
-
+	
 	protected override void Reset()
 	{
 		base.Reset();
 		_serviceName = "/ping";
 	}
-	protected override void OnMessageDequeue(WSServiceBehaviour beh, MessageEventArgs s)
-	{
-		DebugService(" ping recieved got :" + s.RawData.Length + " s ");
-		DebugService(" ping recieved got :" + s.RawData.Length + " s ");
-		string croppedstring = s.Data;
-		if (croppedstring != null)
-		{
-			if (croppedstring.Length > 100) croppedstring = croppedstring.Substring(0, 100);
-			int pingstringStart = -1; // not found
-			pingstringStart = croppedstring.IndexOf("ping");
-			if (pingstringStart < 0) pingstringStart = croppedstring.IndexOf("PING");
-			if (pingstringStart < 0) pingstringStart = croppedstring.IndexOf("ping");
-			if (pingstringStart > 0)
-			{
-				croppedstring = croppedstring.Substring(0, pingstringStart + 1) + '0' + croppedstring.Substring(pingstringStart + 2); //) [pingstringStart + 1] = '0';
-			}
-			beh.SendString(croppedstring);
+	// protected override void OnMessageDequeue(WSServiceBehaviour beh, MessageEventArgs s)
+	// {
+	// 	DebugService(" ping recieved got :" + s.RawData.Length + " s ");
+	// 	DebugService(" ping recieved got :" + s.RawData.Length + " s ");
+	// 	string croppedstring = s.Data;
+	// 	if (croppedstring != null)
+	// 	{
+	// 		if (croppedstring.Length > 100) croppedstring = croppedstring.Substring(0, 100);
+	// 		int pingstringStart = -1; // not found
+	// 		pingstringStart = croppedstring.IndexOf("ping");
+	// 		if (pingstringStart < 0) pingstringStart = croppedstring.IndexOf("PING");
+	// 		if (pingstringStart < 0) pingstringStart = croppedstring.IndexOf("ping");
+	// 		if (pingstringStart > 0)
+	// 		{
+	// 			croppedstring = croppedstring.Substring(0, pingstringStart + 1) + '0' + croppedstring.Substring(pingstringStart + 2); //) [pingstringStart + 1] = '0';
+	// 		}
+	// 		beh.SendString(croppedstring);
 
-			DebugService(" rent response :'" + croppedstring + "'");
+	// 		DebugService(" rent response :'" + croppedstring + "'");
+	// 	}
+	// 	else
+	// 	{
+	// 		beh.SendString("pongish");
+	// 	}
+	// }
+
+	protected override void OnOSCMessage(OSCMessage message, WSServiceBehaviour beh)
+	{
+		string addres = message.Address;
+		if (addres.Contains("ping"))
+		{
+			message.Address = addres.Replace("ping", "pong");
+			if (stats.printOnSend)
+			{
+				DebugService("Sending :"+message.ToReadableString());
+			}
+			beh.Send(message);
 		}
 		else
 		{
-			beh.SendString("pongish");
+			DebugService("messae did not contain ping");
 		}
 	}
 	// var obj = JsonUtility.FromJson<WSFrameworkMessage>(s.Data);

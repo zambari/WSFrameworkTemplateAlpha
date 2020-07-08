@@ -55,9 +55,10 @@ namespace UnityOSC
         public bool AssertTypeTag(int index, char expected)
         {
 
-            if (_typeTag.Length <= index + 1)
+            if (index + 1 >= _typeTag.Length)
             {
-               UnityEngine. Debug.Log("typetag has len " + _typeTag.Length + " requyestng " + (index + 1));
+                UnityEngine.Debug.Log(typeTag);
+                UnityEngine.Debug.Log("typetag has len " + _typeTag.Length + " requyestng " + (index + 1));
                 return false;
             }
 
@@ -207,7 +208,14 @@ namespace UnityOSC
                 return data;
             }
             else
-                throw new Exception("Unsupported data type.");
+            if (value is System.UInt64)
+            {
+                data = BitConverter.GetBytes((ulong) valueObject);
+                if (BitConverter.IsLittleEndian) data = SwapEndian(data);
+                return data;
+            }
+            else
+                throw new Exception("Unsupported data type." + value.ToString());
             //    return data;
         }
 
@@ -255,6 +263,14 @@ namespace UnityOSC
             return BitConverter.ToDouble(buff8, 0);
         }
 
+        protected static ulong UnpackULong(byte[] data, ref int start)
+        {
+            Array.Copy(data, start, buff8, 0, 8);
+            start += 8;
+            if (BitConverter.IsLittleEndian)
+                buff8 = SwapEndian(buff8);
+            return BitConverter.ToUInt64(buff8, 0);
+        }
         protected static long UnpackLong(byte[] data, ref int start)
         {
             Array.Copy(data, start, buff8, 0, 8);

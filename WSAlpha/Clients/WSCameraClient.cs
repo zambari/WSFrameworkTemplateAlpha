@@ -12,10 +12,10 @@ public class WSCameraClient : WSOSCClient
     Texture2D texture;
     public RawImage targetImage;
 
-    [Range(0, 3)]
+    [Range(0, .6f)]
     public float extraRequestinterval = .13f;
 
-    public Vector2Int resolution = new Vector2Int(40, 40);
+    public Vector2Int resolution = new Vector2Int(640, 480);
     public int jpgQuality = 70;
 
     Coroutine requester;
@@ -48,14 +48,18 @@ public class WSCameraClient : WSOSCClient
     [ExposeMethodInEditor]
     void SendConfig()
     {
-        Send(WSCameraService.oscSetResolution.WrapAsOscPayload(resolution.x, resolution.y, jpgQuality));
-        // DebugClient("Sent setres /setResolution " + WSCameraService.oscSetResolution);
+        var msg = new OSCMessage(WSCameraService.oscSetResolution);
+        msg.Append((int)resolution.x);
+        msg.Append((int)resolution.y);
+        msg.Append(jpgQuality);
+        Send(msg);
+        DebugClient(msg.ToReadableString()+ "Sent setres /setResolution "+resolution+"   " + WSCameraService.oscSetResolution);
     }
 
     [ExposeMethodInEditor]
     void SendRequest()
     {
-        Send(WSCameraService.oscRequestFrame.WrapAsOscPayload());
+        SendBytes(WSCameraService.oscRequestFrame.WrapAsOscPayload());
         // DebugClient("Seent requeqst " + WSCameraService.oscRequestFrame);
     }
 
@@ -76,7 +80,7 @@ public class WSCameraClient : WSOSCClient
         if (message.Address == WSCameraService.oscFrameAddress)
         {
             byte[] data = message.GetBytes();
-        
+
             if (texture == null)
                 texture = new Texture2D(1, 1);
             if (texture.LoadImage(data))

@@ -10,6 +10,9 @@ using UnityEngine;
 /// v.04 lastitem, randomitem
 /// v.05 suqrebracketstring
 /// v.05 firstitem, middleitem
+/// v.06 ItemBasedOnNormalized
+/// v.07 aarr to sring
+/// v.07 b maxlen
 /// 
 namespace Z
 {
@@ -39,6 +42,21 @@ namespace Z
                 return (ulong) BitConverter.ToUInt64(bytes, 0);
             }
 
+        }
+
+        public static float InversedSquare(this float f)
+        {
+            f = 1 - f;
+            f *= f;
+            f = 1 - f;
+            return f;
+        }
+        public static float InversedSquareRoot(this float f) //beta
+        {
+            f = 1 - f;
+            f = Mathf.Sqrt(f);
+            f = 1 - f;
+            return f;
         }
         public static string GetGameObjectPath(this GameObject g)
         {
@@ -93,45 +111,49 @@ namespace Z
             bt[1] = t;
             return BitConverter.ToUInt32(bt, 0);
         }
-        public static T FirstItem<T>(this List<T> src)
+        public static T FirstItem<T>(this IList<T> src)
         {
             if (src == null || src.Count == 0) return default(T);
             return src[0];
         }
-        public static T FirstItem<T>(this T[] src)
-        {
-            if (src == null || src.Length == 0) return default(T);
-            return src[0];
-        }
-        public static T LastItem<T>(this T[] src)
-        {
-            if (src == null || src.Length == 0) return default(T);
-            return src[src.Length - 1];
-        }
-        public static T LastItem<T>(this List<T> src)
+
+        public static T LastItem<T>(this IList<T> src)
         {
             if (src == null || src.Count == 0) return default(T);
             return src[src.Count - 1];
         }
-        public static T MiddleItem<T>(this List<T> src)
+        public static T MiddleItem<T>(this IList<T> src)
         {
             if (src == null || src.Count == 0) return default(T);
             return src[src.Count / 2];
         }
-        public static T MiddleItem<T>(this T[] src)
-        {
-            if (src == null || src.Length == 0) return default(T);
-            return src[src.Length / 2];
-        }
-        public static T RandomItem<T>(this T[] src)
-        {
-            if (src == null || src.Length == 0) return default(T);
-            return src[UnityEngine.Random.Range(0, src.Length)];
-        }
-        public static T RandomItem<T>(this List<T> src)
+
+        public static T RandomItem<T>(this IList<T> src)
         {
             if (src == null || src.Count == 0) return default(T);
             return src[UnityEngine.Random.Range(0, src.Count)];
+        }
+
+        public static T ItemBasedOnNormalized<T>(this IList<T> src, float lerpAmt)
+        {
+            if (src == null || src.Count == 0) return default(T);
+
+            return src[IndexBasedOnNormalized(src, lerpAmt)];
+        }
+        public static int IndexBasedOnNormalized<T>(this IList<T> src, float lerpAmt)
+        {
+            if (src == null || src.Count == 0) return 0;
+            int index = Mathf.RoundToInt(lerpAmt * src.Count);
+            if (index < 0) index = 0;
+            if (index >= src.Count) index = src.Count - 1;
+            return index;
+        }
+
+        public static float NormalizedFromIndex<T>(this IList<T> src, int index)
+        {
+            if (src == null || src.Count == 0) return 0;
+            float indexfloat = index;
+            return indexfloat / src.Count;
         }
         public static Int32 SwapEndian(this Int32 source)
         {
@@ -246,24 +268,24 @@ namespace Z
                 byteArray[i] = (byte) s[i];
             return byteArray;
         }
-        public static string ByteArrayToString(this byte[] b, int startIndex = 0, int length = 0) // 2019.09.25
+
+        public static string ByteArrayToString(this byte[] b, int startIndex = 0, int length = 0, char fillNonPrintable = (char) 0) // 2019.09.25
 
         {
-            return b.ArrayToString(startIndex, length);
+            return b.ArrayToString(startIndex, length, fillNonPrintable);
         }
-        public static string ByteArrayToStringAsHex(this byte[] b, int startIndex = 0) // 2017.08.18
+
+        public static string ByteArrayToStringAsHex(this byte[] b, int startIndex = 0, int len = 0) // 2017.08.18 , changed 2020006
         {
-            string s = "";
-
-            if (b.Length == 0) return s;
-            int maxlen = 100;
-            if (b.Length < maxlen) maxlen = b.Length;
-            for (int i = startIndex; i < maxlen; i++)
-                s += "[" + (b[i]).ToHex() + "]";
-            return s;
-
+            StringBuilder sb = new StringBuilder();
+            if (b.Length == 0) return "[no bytes]";
+            if (len == 0) len = 100;
+            if (b.Length - startIndex < len) len = b.Length - startIndex;
+            for (int i = startIndex; i < startIndex + len; i++)
+                sb.Append("[" + (b[i]).ToHex() + "]");
+            return sb.ToString();
         }
-        public static string ArrayToString(this byte[] b, int startIndex = 0, int length = 0) /// 2019.09.25
+        public static string ArrayToString(this byte[] b, int startIndex = 0, int length = 0, char fillNonPrintable = (char) 0) /// 2019.09.25
         {
             string s = "";
             if (b == null || b.Length == 0 || b[0] == 0) return s;
@@ -275,9 +297,45 @@ namespace Z
                 {
                     s += c;
                 }
+                else
+                {
+                    if (fillNonPrintable != (char) 0)
+                        s += fillNonPrintable;
+
+                }
             }
             return s;
         }
+        // // public static string ByteArrayToString(this byte[] b, int startIndex = 0, int length = 0) // 2019.09.25
+
+        // // {
+        // //     return b.ArrayToString(startIndex, length);
+        // // }
+        // // public static string ByteArrayToStringAsHex(this byte[] b, int startIndex = 0) // 2017.08.18
+        // // {
+        // //     string s = "";
+
+        // //     if (b.Length == 0) return s;
+        // //     for (int i = startIndex; i < b.Length; i++)
+        // //         s += "[" + (b[i]).ToHex() + "]";
+        // //     return s;
+
+        // // }
+        // public static string ArrayToString(this byte[] b, int startIndex = 0, int length = 0) /// 2019.09.25
+        // {
+        //     string s = "";
+        //     if (b == null || b.Length == 0 || b[0] == 0) return s;
+        //     if (length == 0) length = b.Length;
+        //     for (int i = startIndex; i < length; i++)
+        //     {
+        //         char c = (char) b[i];
+        //         if (!char.IsControl(c))
+        //         {
+        //             s += c;
+        //         }
+        //     }
+        //     return s;
+        // }
 
         public static string ArrayToString(this byte[] b) // 2017.08.18
         {

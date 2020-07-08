@@ -7,25 +7,32 @@ using UnityEngine.UI;
 public class CommStats
 {
     [Header("Transmit")]
-    [ReadOnly][SerializeField] protected int txBytesTotal;
-    [ReadOnly][SerializeField] protected int txFrames;
+    [ReadOnly] [SerializeField] public int txBytesTotal;
+    [ReadOnly] [SerializeField] protected int txFrames;
 
     [Header("Recieve")]
-    [ReadOnly][SerializeField] protected int rxFrames;
-    [ReadOnly][SerializeField] protected int rxBytesTotal;
+    [ReadOnly] [SerializeField] protected int rxFrames;
+    [ReadOnly] [SerializeField] public int rxBytesTotal;
 
     [HideInInspector]
     [SerializeField] protected int rxBytesSinceTick;
     [HideInInspector]
     [SerializeField] int txBytesSinceTick;
     [Header("Rates")]
-    [ReadOnly][SerializeField] protected int txBytesPerSecond;
-    [ReadOnly][SerializeField] protected int rxBytesPerSecond;
+    [ReadOnly] [SerializeField] protected int txBytesPerSecond;
+    [ReadOnly] [SerializeField] protected float rxBytesPerSecond;
+    [ReadOnly] [SerializeField] protected float rxMessagesPerSecondAverage;
+    [ReadOnly] [SerializeField] [HideInInspector] protected int rxMessagesPerSecondTick;
+
+    public bool printOnRecieve;
+    public bool printOnSend;
     public void AddBytesRecieved(int rx)
     {
         rxBytesTotal += rx;
         rxBytesSinceTick += rx;
         rxFrames++;
+
+        rxMessagesPerSecondTick++;
     }
     public void AddBytesSent(int tx)
     {
@@ -37,10 +44,12 @@ public class CommStats
     {
         if (time == 0) return;
         // Debug.Log("mesring "+txBytesTotal );
-        txBytesPerSecond = Mathf.FloorToInt(txBytesSinceTick / time / 1024);
+        txBytesPerSecond = Mathf.FloorToInt(txBytesSinceTick / time / 1);
         txBytesSinceTick = 0;
-        rxBytesPerSecond = Mathf.FloorToInt(rxBytesSinceTick / time / 1024);
+        rxBytesPerSecond = Mathf.FloorToInt(rxBytesSinceTick / time / 1);
         rxBytesSinceTick = 0;
+        rxMessagesPerSecondAverage = rxMessagesPerSecondAverage * 0.7f + 0.3f * rxMessagesPerSecondTick / time;
+        rxMessagesPerSecondTick = 0;
 
     }
     public IEnumerator DataRateMeasurement()

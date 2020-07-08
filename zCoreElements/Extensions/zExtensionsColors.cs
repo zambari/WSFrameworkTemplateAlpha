@@ -3,8 +3,10 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-///  v/// oeverrides zRectExtensions
-// v..2 setcolor
+///oeverrides zRectExtensions
+// v.0.2 setcolor
+// v.0.3 sat
+// v.0.3a better wrapping for hue
 public static class zExtensionsColors // to useful to be in namespace1
 {
     public static Color ShiftHue(this Color src, float hueshitamount)
@@ -14,20 +16,38 @@ public static class zExtensionsColors // to useful to be in namespace1
         float V;
         Color.RGBToHSV(src, out H, out S, out V);
         H += hueshitamount;
-        if (H < 0) H += 1;
-        if (H > 1) H -= 1;
+        while (H < 0) H += 1;
+        while (H > 1) H -= 1;
 
         return Color.HSVToRGB(H, S, V);
 
         // return UnityEngine.Random.ColorHSV(0.4f, 0.8f, 0.3f, 0.6f);4
     }
-    public static Color ShiftSat(this Color src, float hueshitamount)
+    /// <summary>
+    /// linearly fade saturation amount
+    /// </summary>
+    /// <param name="src"></param>
+    /// <param name="satshiftamount"></param>
+    /// <returns></returns>
+    public static Color ShiftSat(this Color src, float satshiftamount)
+    {
+        return src.SaturationOffset(satshiftamount);
+
+        // return UnityEngine.Random.ColorHSV(0.4f, 0.8f, 0.3f, 0.6f);4
+    }
+    /// <summary>
+    /// linearly fade saturation amount
+    /// </summary>
+    /// <param name="src"></param>
+    /// <param name="satshiftamount"></param>
+    /// <returns></returns>
+    public static Color SaturationOffset(this Color src, float satshiftamount)
     {
         float H;
         float S;
         float V;
         Color.RGBToHSV(src, out H, out S, out V);
-        S += hueshitamount;
+        S += satshiftamount;
         if (S < 0) S = 0;
         if (S > 1) H = 1;
 
@@ -35,7 +55,32 @@ public static class zExtensionsColors // to useful to be in namespace1
 
         // return UnityEngine.Random.ColorHSV(0.4f, 0.8f, 0.3f, 0.6f);4
     }
-
+    public static Color SaturationMulti(this Color src, float satMulti, float lumaoffset = 0)
+    {
+        float H;
+        float S;
+        float V;
+        Color.RGBToHSV(src, out H, out S, out V);
+        S *= satMulti;
+        if (S < 0) S = 0;
+        if (S > 1) H = 1;
+        V += lumaoffset;
+        return Color.HSVToRGB(H, S, V);
+        // return UnityEngine.Random.ColorHSV(0.4f, 0.8f, 0.3f, 0.6f);4
+    }
+    public static Color SaturationAndBrigntessAdjust(this Color src, float satMulti, float bright)
+    {
+        float H;
+        float S;
+        float V;
+        Color.RGBToHSV(src, out H, out S, out V);
+        S *= satMulti;
+        if (S < 0) S = 0;
+        if (S > 1) H = 1;
+        V = bright;
+        return Color.HSVToRGB(H, S, V);
+        // return UnityEngine.Random.ColorHSV(0.4f, 0.8f, 0.3f, 0.6f);4
+    }
     public static Color SetAlpha(this Color c, float a)
     {
         c.a = a;

@@ -1173,9 +1173,7 @@ namespace WebSocketSharp
       closeAsync (new PayloadData (code, reason), send, send, false);
     }
 
-    private void closeAsync (
-      PayloadData payloadData, bool send, bool receive, bool received
-    )
+    private void closeAsync (      PayloadData payloadData, bool send, bool receive, bool received    )
     {
       Action<PayloadData, bool, bool, bool> closer = close;
       closer.BeginInvoke (

@@ -4,173 +4,187 @@ using UnityEngine;
 using UnityEngine.UI;
 using WebSocketSharp;
 using WebSocketSharp.Server;
+using WSFrameworkConst;
+// v.01. twaks
 
+/// <summary>
+/// You might consider inhrinting from the OSC variant instead
+/// </summary>
 public abstract class WSServiceBase : MonoBehaviour
 {
-	// public CommStats statsSumary = new CommStats(); //temporary
-	[ReadOnly]
-	public int connectedClientsCount;
-	public WSServer server { get { if (_server == null) GetServer(); return _server; } }
+    public WSServer server { get { if (_server == null) GetServer(); return _server; } }
 
-	[SerializeField] WSServer _server;
-	[SerializeField] protected string _serviceName = "/test";
-	public CommStats stats = new CommStats();
-	public string serviceName { get { return _serviceName; } set { _serviceName = value; } } // "/ping";
-	public bool autoStart = true;
-	Coroutine aligner;
-	protected bool timeSpreadQueueItems;
+    [SerializeField] protected WSServer _server;
+    [ReadOnly]
+    public int connectedClients;
 
-	List<WSServiceBehaviour> clientHanlders = new List<WSServiceBehaviour>();
-	protected abstract void OnMessageDequeue(WSServiceBehaviour beh, WebSocketSharp.MessageEventArgs message);
-	protected virtual void OnErrror(WSServiceBehaviour behaviour, WebSocketSharp.ErrorEventArgs e)
-	{
-		DebugService("WSServiceBehaviour Got error " + e.Message);
-	}
-	protected virtual void OnClose(WSServiceBehaviour behaviour, WebSocketSharp.CloseEventArgs e)
-	{
-		if (clientHanlders.Contains(behaviour))
-			clientHanlders.Remove(behaviour);
-		connectedClientsCount = clientHanlders.Count;
-		DebugService("WSServiceBehaviour closed with reason " + e.Reason + "  connectedClientsCount= " + connectedClientsCount);
-	}
-	GameObject myGameObject;
+    [SerializeField] protected string _serviceName = "/test";
 
-	protected void BroacdcastString(string s)
-	{
-		foreach (var c in clientHanlders)
-		{
-			c.SendString(s);
-			stats.AddBytesSent(s.Length);
-		}
-		if (clientHanlders.Count == 0)
-			DebugService("no clients connected");
-		else
-			DebugService("Broadcast '" + s + "' (" + s.Length + " bytes) to " + clientHanlders.Count + " clients");
-	}
-	protected void BroacdcastBytes(byte[] s)
-	{
-		foreach (var c in clientHanlders)
-		{
-			c.SendAsync(s, null);
-			stats.AddBytesSent(s.Length);
-		}
-		if (clientHanlders.Count == 0)
-			DebugService("no clients connected");
-	//	else
-	//		DebugService("Broadcast " + s.Length + "bytes to " + clientHanlders.Count + " clients");
-	}
+    public CommStats stats = new CommStats();
+    public string serviceName { get { return _serviceName; } set { _serviceName = value; } } // "/ping";
+    [Space]
+    public bool autoStart = true;
+    [Space]
+    protected List<WSServiceBehaviour> clientHanlders = new List<WSServiceBehaviour>();
+    protected abstract void OnMessageDequeue(WSServiceBehaviour beh, WebSocketSharp.MessageEventArgs message);
+    protected void OnErrror(WSServiceBehaviour behaviour, WebSocketSharp.ErrorEventArgs e)
+    {
+        DebugService("WSServiceBehaviour Got error " + e.Message);
+    }
+    protected void OnClose(WSServiceBehaviour behaviour, WebSocketSharp.CloseEventArgs e)
+    {
+        // Debug.Log("not removing handler !");
+        // if (clientHanlders.Contains(behaviour))
+        // 	clientHanlders.Remove(behaviour);
+        // connectedClients = clientHanlders.Count;
+        if (string.IsNullOrEmpty(e.Reason))
+            DebugService("WSServiceBehaviour closed");
+        else
+            DebugService("WSServiceBehaviour closed with reason " + e.Reason);
+    }
+    GameObject myGameObject;
 
-	protected virtual void OnOpen(WSServiceBehaviour serviceBehaviour)
-	{
-		//	clientHanlders.Add(serviceBehaviour);
-		// DebugService("WSServiceBehaviour Open ");
-	}
-	protected virtual void Reset()
-	{
-		string possiblename = this.GetType().ToString();
-		if (possiblename.StartsWith("WS"))
-			possiblename = possiblename.Substring(2);
-		if (possiblename.EndsWith("Service"))
-			possiblename = possiblename.Substring(-7);
+    // protected void BroacdcastString(string s)
+    // {
+    // 	lock(clientHanlders)
+    // 	{
+    // 		foreach (var c in clientHanlders)
+    // 		{
+    // 			c.SendString(s);
+    // 			stats.AddBytesSent(s.Length);
+    // 		}
+    // 		if (clientHanlders.Count == 0)
+    // 			DebugService("no clients connected");
+    // 		else
+    // 			DebugService("Broadcast '" + s + "' (" + s.Length + " bytes) to " + clientHanlders.Count + " clients");
+    // 	}
+    // }
 
-		serviceName = "/" + possiblename;
-		GetServer();
-	}
-	void GetServer()
-	{
-		if (_server == null) _server = GetComponent<WSServer>();
-		if (_server == null) _server = GameObject.FindObjectOfType<WSServer>();
-	}
+    protected void BroacdcastBytes(byte[] s)
+    {
+        lock (clientHanlders)
+        {
+            foreach (var c in clientHanlders)
+            {
+                c.SendAsync(s, null);
+                stats.AddBytesSent(s.Length);
+            }
+            if (clientHanlders.Count == 0)
+                DebugService("no clients connected");
+        }
+    }
 
-	protected virtual void Start()
-	{
-		myGameObject = gameObject;
-		if (autoStart)
-			if (server != null)
-			{
-				server.AddService(this);
-			}
-	}
+    protected virtual void OnOpen(WSServiceBehaviour serviceBehaviour)
+    {
+        //	clientHanlders.Add(serviceBehaviour);
+        // DebugService("WSServiceBehaviour Open ");
+    }
 
-	public void Initializer(WSServiceBehaviour beh)
-	{
-		// Debug.Log("service run initialize");
-		lock(clientHanlders)
-		{
-			beh.stats = stats;
-			clientHanlders.Add(beh);
-			connectedClientsCount = clientHanlders.Count;
-		}
-	}
+    protected virtual void Reset()
+    {
+        GetServer();
 
-	protected void DebugService(string s)
-	{
-		Debug.Log((this.GetType().ToString() + " " + s).MakeColor(new Color(.6f, .6f, .3f)), myGameObject);
-	}
+        serviceName = this.GetPossibleServiceName();
+    }
+    void GetServer()
+    {
+        if (_server == null) _server = GetComponent<WSServer>();
+        if (_server == null) _server = GameObject.FindObjectOfType<WSServer>();
+    }
 
-	protected virtual void OnEnable()
-	{
-		aligner = StartCoroutine(Aligner());
-	}
+    protected virtual void Start()
+    {
+        myGameObject = gameObject;
+        if (autoStart)
+            if (server != null)
+            {
+                server.AddService(this);
+            }
+    }
 
-	protected virtual void OnDisable()
-	{
-		StopCoroutine(aligner);
-	}
+    public void Initializer(WSServiceBehaviour beh)
+    {
+        // Debug.Log("service run initialize");
+        lock (clientHanlders)
+        {
+            beh.stats = stats;
+            clientHanlders.Add(beh);
+            connectedClients = clientHanlders.Count;
+        }
+    }
 
-	[HideInInspector]
-	IEnumerator Aligner()
-	{
-		while (true)
-		{
-			//lock(behaviours)
-			{
-				foreach (var thisClient in clientHanlders)
-				{
-					while (thisClient.messageQueue.Count > 0)
-					{
-						//	DebugService("we have " + thisClient.messageQueue.Count + " messages");
-						MessageEventArgs msg;
-						lock(thisClient.messageQueue)
-						{
-							msg = thisClient.messageQueue.Dequeue();
-						}
-						OnMessageDequeue(thisClient, msg);
-						if (timeSpreadQueueItems)
-							yield return null;
-					}
-					while (thisClient.closedQueue.Count > 0)
-					{
-						CloseEventArgs close;
-						lock(thisClient.closedQueue)
-						{
-							close = thisClient.closedQueue.Dequeue();
-						}
-						if (close == null)
-						{
-							OnOpen(thisClient);
-						}
-						else
-						{
-							OnClose(thisClient, close);
-						}
-					}
-					while (thisClient.errorQueue.Count > 0)
-					{
-						ErrorEventArgs err;
-						lock(thisClient.errorQueue)
-						{
-							err = thisClient.errorQueue.Dequeue();
-						}
-						OnErrror(thisClient, err);
-					}
+    protected void DebugService(string s)
+    {
+        string preppedstring = ("S " + serviceName.MakeColor(Const.serviceNameColor).Small() + " " + s.MakeColor(Const.serviceMessageColor));
+        //zBench.DebugOnceInAWhile(preppedstring, gameObject);
+        Debug.Log(preppedstring, gameObject);
 
-					yield return null;
-				}
-				yield return null;
-			}
-		}
+        // Debug.Log(preppedstring, myGameObject);
+    }
+    List<WSServiceBehaviour> inactiveBehs;
+    protected void UpdateQueues()
+    {
+        foreach (var thisClient in clientHanlders)
+        {
 
-	}
+            while (thisClient.messageQueue.Count > 0)
+            {
+                MessageEventArgs msg;
+                lock (thisClient.messageQueue)
+                {
+                    msg = thisClient.messageQueue.Dequeue();
+                }
+                OnMessageDequeue(thisClient, msg);
+            }
+            if (thisClient.closedQueue.Count > 0)
+            {
+                CloseEventArgs close;
+                lock (thisClient.closedQueue)
+                {
+                    close = thisClient.closedQueue.Dequeue();
+                }
+                if (close == null)
+                {
+                    OnOpen(thisClient);
+                    if (server != null)
+                        server.OnClientConnectedNotification(this);
+                }
+                else
+                {
+                    if (inactiveBehs == null) inactiveBehs = new List<WSServiceBehaviour>();
+                    inactiveBehs.Add(thisClient);
+                    OnClose(thisClient, close);
+
+                }
+            }
+            if (thisClient.errorQueue.Count > 0)
+            {
+                ErrorEventArgs err;
+                lock (thisClient.errorQueue)
+                {
+                    err = thisClient.errorQueue.Dequeue();
+                }
+                OnErrror(thisClient, err);
+            }
+        }
+        if (inactiveBehs != null)
+        {
+            foreach (var deactivated in inactiveBehs)
+            {
+                if (clientHanlders.Contains(deactivated))
+                    clientHanlders.Remove(deactivated);
+                connectedClients = clientHanlders.Count;
+                inactiveBehs = null;
+            }
+            if (server != null)
+                server.OnClientDisconnectedNotification(this);
+        }
+    }
+
+    void Update()
+    {
+        UpdateQueues();
+
+    }
 
 }

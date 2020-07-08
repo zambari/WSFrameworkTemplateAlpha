@@ -30,7 +30,7 @@ public class zOSCSetupServer : MonoBehaviour, IConsumeOSC
 			int port = msg.GetInt(ref index);
 
 			if (targetSelector.valueSource != null)
-				targetSelector.valueSource.AddTarget(adr, port);
+				targetSelector.valueSource.AddTarget(adr, port,true);
 			Debug.Log("^trying to ad target  " + adr + ":" + port);
 		}
 

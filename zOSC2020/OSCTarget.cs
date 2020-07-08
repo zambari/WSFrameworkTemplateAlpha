@@ -11,12 +11,14 @@ public class OSCTarget
 	public string targetAddr = "127.0.0.1";
 	public int targetPort = 9988;
 	public OSCClient client;
-	public bool use=true;
+	public bool use = true;
 	public bool isConnected { get { return client != null; } }
-	public OSCTarget(string targetAddr, int targetPort)
+	public OSCTarget(string targetAddr, int targetPort, bool use = true)
 	{
 		this.targetAddr = targetAddr;
 		this.targetPort = targetPort;
+		this.use = use;
+
 	}
 	public void Close()
 	{

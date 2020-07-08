@@ -5,17 +5,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityOSC;
 using Z;
-public class zOSCSender : MonoBehaviour, ISendOSC
+public class zOSCSender : MonoBehaviour, ISendOSC, ITakeOSCTarget
 {
-public zOSCSenderModule senderModule=new zOSCSenderModule();
-    [Header("Sender")]
-    public string targetAddr = "127.0.0.1";
-    public int targetPort = 9988;
-    public CommStats stats = new CommStats();
-
-    OSCClient client;
-    public bool autoConect = true;
-    int reconnectInterval = 5;
+    public zOSCSenderModule senderModule = new zOSCSenderModule();
     // void Start()
     // {
     //     if (autoConect)
@@ -31,9 +23,14 @@ public zOSCSenderModule senderModule=new zOSCSenderModule();
     //         yield return new WaitForSeconds(reconnectInterval);
     //     }
     // }
-    public void AddTarget(string addr, int portNr)
+    public void SetTargetEnabled(int targetIndex, bool use)
     {
-         senderModule.AddTarget(addr,portNr);
+        if (targetIndex < 0 || targetIndex >= senderModule.targets.Count) return;
+        senderModule.targets[targetIndex].use = use;
+    }
+    public void AddTarget(string addr, int portNr, bool use)
+    {
+        senderModule.AddTarget(addr, portNr, use);
         // if (client != null) client.Close();
         // targetAddr = addr;
         // targetPort = portNr;
@@ -44,32 +41,35 @@ public zOSCSenderModule senderModule=new zOSCSenderModule();
         //     return false;
         // } else 
         //     Debug.Log("zOSC_1 sender is now targetting : " + addr + " : " + portNr);
-        
+
         // return true;
     }
-   
+
+    public void RemoveTarget(string addr, int port)
+    {
+        throw new System.NotImplementedException();
+    }
 
     public void Send(OSCMessage message)
     {
         senderModule.Send(message);
-        // if (client != null)
-        // {
-
-        //     //   if (!detailedLog)
-        //     Debug.Log(message.Address + " " + message.typeTag);
-        //     //   else
-        //     //  Debug.Log(message.Address + " " + message.typeTag+"    binary: "+message.BinaryData.ByteArrayToStringAsHex());
-        //     client.Send(message);
-        //     stats.TotalBytes += message.BinaryData.Length; // stats
-        //     stats.TotalPackets++; // stats
-        //     Debug.Log("sent msg " + message.Address);
-
-        // }
-        // else
-        // {
-        //     Debug.Log("client is null");
-        // }
-
+     
+    }
+    void Awake()
+    {
+        senderModule.loggingInfo.name = name;
+    }
+    void Start()
+    {
+        //base.Start();
+        StartSenderKeepalive();
+        if (senderModule.autoConect)
+            senderModule.ConnectToTargets();
     }
 
+    void StartSenderKeepalive()
+    {
+        if (senderModule.autoConect)
+            StartCoroutine(senderModule.CheckerRoutine());
+    }
 }

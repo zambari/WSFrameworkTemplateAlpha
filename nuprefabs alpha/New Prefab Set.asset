@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1565b7bd86283c4aae566642500f02a, type: 3}
+  m_Name: New Prefab Set
+  m_EditorClassIdentifier: 
+  varianName: None
+  namedGameObjects:
+  - name: Label
+    value: {fileID: 2364273743928853263, guid: ac6337aabf78a3c44ac524442ee178bd, type: 3}
+  - name: Button
+    value: {fileID: 7936394765757021084, guid: d13026ae255f4bd4e80c60263c63919d, type: 3}
+  - name: Slider
+    value: {fileID: 6540807383826106102, guid: 675b45714e1d71748b6637ecef6e4778, type: 3}
+  - name: Toggle
+    value: {fileID: 2612486685556554284, guid: 7bf9974bf95c0d741a071c70ba1cf175, type: 3}
+  - name: InputField
+    value: {fileID: 463211503389254538, guid: b06f833fd4671bb41a2ebd08ebbcdeb3, type: 3}
+  - name: Subpanel
+    value: {fileID: 4650129037674496070, guid: 9b475bb8c320f6e419d592936878198b, type: 3}
+  - name: Horizontal
+    value: {fileID: 0}
+  - name: DropDown
+    value: {fileID: 0}
